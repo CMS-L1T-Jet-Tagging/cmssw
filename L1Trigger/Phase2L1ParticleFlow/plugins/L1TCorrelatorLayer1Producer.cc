@@ -1035,7 +1035,6 @@ std::unique_ptr<l1t::PFCandidateCollection> L1TCorrelatorLayer1Producer::fetchPF
       ret->back().setHwTkQuality(p.hwTkQuality);
       ret->back().setCaloEta(reg.floatGlbEtaOf(p));
       ret->back().setCaloPhi(reg.floatGlbPhiOf(p));
-
       setRefs_(ret->back(), p);
     }
     for (const auto &p : event_.out[ir].pfneutral) {

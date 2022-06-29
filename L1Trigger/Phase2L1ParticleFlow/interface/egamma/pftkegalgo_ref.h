@@ -117,6 +117,9 @@ namespace l1ct {
           emClusterPtMin(emClusterPtMin),
           dEtaMaxBrem(dEtaMaxBrem),
           dPhiMaxBrem(dPhiMaxBrem),
+          //absEtaBoundaries(std::move(absEtaBoundaries)),
+          //dEtaValues(std::move(dEtaValues)),
+          //dPhiValues(std::move(dPhiValues)),
           absEtaBoundaries(absEtaBoundaries),
           dEtaValues(dEtaValues),
           dPhiValues(dPhiValues),
@@ -163,6 +166,8 @@ namespace l1ct {
     typedef ap_fixed<12, 3, AP_RND_CONV, AP_SAT> bdt_score_t;
 
   private:
+
+
     void link_emCalo2emCalo(const std::vector<EmCaloObjEmu> &emcalo, std::vector<int> &emCalo2emCalo) const;
 
     void link_emCalo2tk_elliptic(const PFRegionEmu &r,

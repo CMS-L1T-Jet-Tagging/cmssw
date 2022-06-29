@@ -9,6 +9,8 @@
 #include <bitset>
 #include <vector>
 
+#include "L1Trigger/Phase2L1ParticleFlow/src/dbgPrintf.h"
+#include "DataFormats/L1THGCal/interface/HGCalMulticluster.h"
 using namespace l1ct;
 
 #ifdef CMSSW_GIT_HASH
@@ -134,6 +136,16 @@ PFTkEGAlgoEmulator::PFTkEGAlgoEmulator(const PFTkEGAlgoEmuConfig &config)
     auto resolvedFileName = cfg.compIDparams.conifer_model;
 #endif
     composite_bdt_ = new conifer::BDT<bdt_feature_t, bdt_score_t, false>(resolvedFileName);
+  }
+}
+
+PFTkEGAlgoEmulator::PFTkEGAlgoEmulator(const PFTkEGAlgoEmuConfig &config) : cfg(config), 
+composite_bdt_(nullptr), 
+debug_(cfg.debug) {
+  if(cfg.doCompositeTkEle) {
+    //FIXME: make the name of the file configurable
+    auto resolvedFileName = edm::FileInPath("L1Trigger/Phase2L1ParticleFlow/src/newfirmware/egamma/compositeID.json").fullPath();
+    composite_bdt_ = std::make_unique<conifer::BDT<ap_fixed<22,3,AP_RND_CONV,AP_SAT>,ap_fixed<22,3,AP_RND_CONV,AP_SAT>,0>> (resolvedFileName);
   }
 }
 
@@ -372,6 +384,12 @@ void PFTkEGAlgoEmulator::run(const PFInputRegion &in, OutputRegion &out) const {
     link_emCalo2tk_elliptic(in.region, emcalo_sel, in.track, emCalo2tk);
   }
 
+  if(cfg.doCompositeTkEle) {
+    link_emCalo2tk_composite(in.region, emcalo_sel, in.track, emCalo2tk, emCaloTkBdtScore);
+  } else {
+    link_emCalo2tk_elliptic(in.region, emcalo_sel, in.track, emCalo2tk);
+  }
+  
   out.egsta.clear();
   std::vector<EGIsoObjEmu> egobjs;
   std::vector<EGIsoEleObjEmu> egeleobjs;

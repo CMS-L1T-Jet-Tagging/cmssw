@@ -2889,10 +2889,11 @@ void L1TrackObjectNtupleMaker::analyze(const edm::Event& iEvent, const edm::Even
 
   if (SaveTrackSums) {
     if (Displaced == "Prompt" || Displaced == "Both") {
-      if (L1TkMETHandle.isValid()) {
+      if (L1TkMETHandle.isValid()){
         trkMET = L1TkMETHandle->begin()->etMiss();
         trkMETPhi = L1TkMETHandle->begin()->p4().phi();
-      } else {
+      }
+      else {
         edm::LogWarning("DataNotFound") << "\nWarning: tkMET handle not found" << std::endl;
       }
 
@@ -2921,7 +2922,8 @@ void L1TrackObjectNtupleMaker::analyze(const edm::Event& iEvent, const edm::Even
       if (L1TkMETExtendedHandle.isValid()) {
         trkMETExt = L1TkMETExtendedHandle->begin()->etMiss();
         trkMETPhiExt = L1TkMETExtendedHandle->begin()->p4().phi();
-      } else {
+      }
+      else {
         edm::LogWarning("DataNotFound") << "\nWarning: tkMETExtended handle not found" << std::endl;
       }
 

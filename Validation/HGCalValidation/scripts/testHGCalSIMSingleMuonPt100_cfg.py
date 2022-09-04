@@ -1,20 +1,59 @@
+###############################################################################
+# Way to use this:
+#   cmsRun testHGCalSingleMuonPt100_cfg.py geometry=D92
+#
+#   Options for geometry D49, D88, D92, D93
+#
+###############################################################################
 import FWCore.ParameterSet.Config as cms
 import os, sys, imp, re, random
 import FWCore.ParameterSet.VarParsing as VarParsing
 
-from Configuration.Eras.Era_Phase2C17I13M9_cff import Phase2C17I13M9
-process = cms.Process('SingleMuonSim',Phase2C17I13M9)
+####################################################################
+### SETUP OPTIONS
+options = VarParsing.VarParsing('standard')
+options.register('geometry',
+                 "D92",
+                  VarParsing.VarParsing.multiplicity.singleton,
+                  VarParsing.VarParsing.varType.string,
+                  "geometry of operations: D49, D88, D92, D93")
 
-geomFile = "Geometry.HGCalCommonData.testHGCalV17ShiftReco_cff"
-globalTag = "auto:phase2_realistic_T21"
-outFile = "file:step1V17ShiftMu.root"
+### get and parse the command line arguments
+options.parseArguments()
 
-print("Geometry file: ", geomFile)
-print("Global Tag:    ", globalTag)
-print("Output file:   ", outFile)
+print(options)
+
+####################################################################
+# Use the options
+
+if (options.geometry == "D49"):
+    from Configuration.Eras.Era_Phase2C9_cff import Phase2C9
+    process = cms.Process('SingleMuon',Phase2C9)
+    process.load('Configuration.Geometry.GeometryExtended2026D49_cff')
+    process.load('Configuration.Geometry.GeometryExtended2026D49Reco_cff')
+    globalTag = "auto:phase2_realistic_T15"
+elif (options.geometry == "D88"):
+    from Configuration.Eras.Era_Phase2C11I13M9_cff import Phase2C11I13M9
+    process = cms.Process('SingleMuon',Phase2C11I13M9)
+    process.load('Configuration.Geometry.GeometryExtended2026D88_cff')
+    process.load('Configuration.Geometry.GeometryExtended2026D88Reco_cff')
+    globalTag = "auto:phase2_realistic_T21"
+elif (options.geometry == "D93"):
+    from Configuration.Eras.Era_Phase2C11I13M9_cff import Phase2C11I13M9
+    process = cms.Process('SingleMuon',Phase2C11I13M9)
+    process.load('Configuration.Geometry.GeometryExtended2026D93_cff')
+    process.load('Configuration.Geometry.GeometryExtended2026D93Reco_cff')
+    globalTag = "auto:phase2_realistic_T21"
+else:
+    from Configuration.Eras.Era_Phase2C11I13M9_cff import Phase2C11I13M9
+    process = cms.Process('SingleMuon',Phase2C11I13M9)
+    process.load('Configuration.Geometry.GeometryExtended2026D92_cff')
+    process.load('Configuration.Geometry.GeometryExtended2026D92Reco_cff')
+    globalTag = "auto:phase2_realistic_T21"
+
+print("Global Tag: ", globalTag)
 
 # import of standard configurations
-process.load(geomFile)
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
@@ -28,7 +67,6 @@ process.load('Configuration.StandardSequences.SimIdeal_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
-process.load('SimG4CMS.Calo.hgcalHitPartial_cff')
 process.load("IOMC.RandomEngine.IOMC_cff")
 
 rndm = random.randint(0,200000)
@@ -36,14 +74,13 @@ process.RandomNumberGeneratorService.generator.initialSeed = rndm
 print("Processing with random number seed: ", rndm)
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(5000)
+    input = cms.untracked.int32(1000)
 )
 
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 5
 if hasattr(process,'MessageLogger'):
-    process.MessageLogger.HGCalError=dict()
-#   process.MessageLogger.HGCSim=dict()
-#   process.MessageLogger.HGCalSim=dict()
+    process.MessageLogger.ValidHGCal=dict()
+    process.MessageLogger.HGCalGeom=dict()
 
 # Input source
 process.source = cms.Source("EmptySource")
@@ -73,8 +110,7 @@ process.output = cms.OutputModule("PoolOutputModule",
         filterName = cms.untracked.string(''),
         dataTier = cms.untracked.string('GEN-SIM-DIGI-RAW-RECO')
     ),
-    fileName = cms.untracked.string(outFile),
-dation/HGCalValidation/scripts/testHGCalSIMSingleMuonPt100_cfg.py
+    fileName = cms.untracked.string('step1.root'),
     outputCommands = process.FEVTDEBUGEventContent.outputCommands,
     eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
     splitLevel = cms.untracked.int32(0)
@@ -95,7 +131,7 @@ process.generator = cms.EDFilter("Pythia8PtGun",
         AddAntiParticle = cms.bool(True),
         MaxEta = cms.double(3.1),
         MaxPhi = cms.double(3.14159265359),
-        MinEta = cms.double(2.8),
+        MinEta = cms.double(1.3),
         MinPhi = cms.double(-3.14159265359) ## in radians
         ),
         Verbosity = cms.untracked.int32(0), ## set to 1 (or greater)  for printouts
@@ -108,15 +144,11 @@ process.generator = cms.EDFilter("Pythia8PtGun",
 #Modified to produce hgceedigis
 process.ProductionFilterSequence = cms.Sequence(process.generator)
 
-process.g4SimHits.HGCSD.CheckID = True
-process.g4SimHits.HGCScintSD.CheckID = True
-
 # Path and EndPath definitions
 process.generation_step = cms.Path(process.pgen)
 process.simulation_step = cms.Path(process.psim)
 process.genfiltersummary_step = cms.EndPath(process.genFilterSummary)
 process.endjob_step = cms.EndPath(process.endOfProcess)
-process.analysis_step = cms.Path(process.hgcalHitPartialEE+process.hgcalHitPartialHE+process.hgcalHitPartialHEB)
 process.out_step = cms.EndPath(process.output)
 
 # Schedule definition
@@ -124,7 +156,6 @@ process.schedule = cms.Schedule(process.generation_step,
                                 process.genfiltersummary_step,
 				process.simulation_step,
                                 process.endjob_step,
-                                process.analysis_step,
 				process.out_step
 				)
 

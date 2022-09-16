@@ -144,7 +144,7 @@ composite_bdt_(nullptr),
 debug_(cfg.debug) {
   if(cfg.doCompositeTkEle) {
     //FIXME: make the name of the file configurable
-    auto resolvedFileName = edm::FileInPath("L1Trigger/Phase2L1ParticleFlow/src/newfirmware/egamma/compositeID.json").fullPath();
+    auto resolvedFileName = edm::FileInPath("L1Trigger/Phase2L1ParticleFlow/data/compositeID.json").fullPath();
     composite_bdt_ = std::make_unique<conifer::BDT<ap_fixed<22,3,AP_RND_CONV,AP_SAT>,ap_fixed<22,3,AP_RND_CONV,AP_SAT>,0>> (resolvedFileName);
   }
 }

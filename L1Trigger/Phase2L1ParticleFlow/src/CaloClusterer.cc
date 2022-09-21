@@ -422,7 +422,6 @@ std::unique_ptr<l1t::PFClusterCollection> l1tpf_calo::SingleCaloClusterer::fetch
     ret->back().setHwEta(grid_->ieta(theIndex));
     ret->back().setHwPhi(grid_->iphi(theIndex));
   }
-  
   return ret;
 }
 

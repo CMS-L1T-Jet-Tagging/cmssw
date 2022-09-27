@@ -3,6 +3,7 @@
 
 #include "L1Trigger/Phase2L1ParticleFlow/interface/regionizer/multififo_regionizer_ref.h"
 #include <memory>
+#include <deque>
 
 namespace l1ct {
   struct EGInputSelectorEmuConfig;

@@ -307,7 +307,11 @@ l1ct::MultififoRegionizerEmulator::BarrelSetup l1ct::MultififoRegionizerEmulator
 void l1ct::MultififoRegionizerEmulator::setEgInterceptMode(bool afterFifo,
                                                            const l1ct::EGInputSelectorEmuConfig& interceptorConfig) {
   emInterceptMode_ = afterFifo ? interceptPostFifo : interceptPreFifo;
+#ifdef CMSSW_GIT_HASH
   interceptor_ = std::make_unique<EGInputSelectorEmulator>(interceptorConfig);
+#else
+  interceptor_.reset(new EGInputSelectorEmulator(interceptorConfig));
+#endif
 }
 
 void l1ct::MultififoRegionizerEmulator::initSectorsAndRegions(const RegionizerDecodedInputs& in,

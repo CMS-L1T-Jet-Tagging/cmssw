@@ -148,7 +148,7 @@ debug_(cfg.debug) {
           auto resolvedFileName = "compositeID.json";
 #endif
     std::cout<<resolvedFileName<<std::endl;
-	  composite_bdt_ = new conifer::BDT<ap_fixed<22,3,AP_RND_CONV,AP_SAT>,ap_fixed<22,3,AP_RND_CONV,AP_SAT>,0> (resolvedFileName);
+	  composite_bdt_ = new conifer::BDT<ap_fixed<21,12,AP_RND_CONV,AP_SAT>,ap_fixed<12,3,AP_RND_CONV,AP_SAT>,0> (resolvedFileName);
     std::cout<<"declared bdt"<<std::endl;
   }
 }

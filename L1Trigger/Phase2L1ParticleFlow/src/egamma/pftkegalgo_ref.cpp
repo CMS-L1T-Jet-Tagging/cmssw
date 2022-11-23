@@ -137,19 +137,15 @@ PFTkEGAlgoEmulator::PFTkEGAlgoEmulator(const PFTkEGAlgoEmuConfig &config)
   }
 }
 
-PFTkEGAlgoEmulator::PFTkEGAlgoEmulator(const PFTkEGAlgoEmuConfig &config) : cfg(config), 
-composite_bdt_(nullptr), 
-debug_(cfg.debug) {
-  if(cfg.doCompositeTkEle) {
-    //FIXME: make the name of the file configurable
+PFTkEGAlgoEmulator::PFTkEGAlgoEmulator(const PFTkEGAlgoEmuConfig &config)
+    : cfg(config), composite_bdt_(nullptr), debug_(cfg.debug) {
+  if (cfg.doCompositeTkEle) {
 #ifdef CMSSW_GIT_HASH
-	  auto resolvedFileName = edm::FileInPath("L1Trigger/Phase2L1ParticleFlow/data/compositeID.json").fullPath();
+    auto resolvedFileName = edm::FileInPath(cfg.compIDparams.conifer_model).fullPath();
 #else
-          auto resolvedFileName = "compositeID.json";
+    auto resolvedFileName = cfg.compIDparams.conifer_model;
 #endif
-    std::cout<<resolvedFileName<<std::endl;
-	  composite_bdt_ = new conifer::BDT<ap_fixed<21,12,AP_RND_CONV,AP_SAT>,ap_fixed<12,3,AP_RND_CONV,AP_SAT>,0> (resolvedFileName);
-    std::cout<<"declared bdt"<<std::endl;
+    composite_bdt_ = new conifer::BDT<bdt_feature_t, ap_fixed<12, 3, AP_RND_CONV, AP_SAT>, false>(resolvedFileName);
   }
 }
 
@@ -266,15 +262,12 @@ void PFTkEGAlgoEmulator::link_emCalo2tk_composite(const PFRegionEmu &r,
                                                   std::vector<int> &emCalo2tk,
                                                   std::vector<float> &emCaloTkBdtScore) const {
   unsigned int nTrackMax = std::min<unsigned>(track.size(), cfg.nTRACK_EGIN);
-  std::cout<<"doing loose dR matching"<<std::endl;
   for (int ic = 0, nc = emcalo.size(); ic < nc; ++ic) {
-    std::cout<<"cluster "<<ic<<std::endl;
     auto &calo = emcalo[ic];
 
     std::vector<CompositeCandidate> candidates;
 
     for (unsigned int itk = 0; itk < nTrackMax; ++itk) {
-      std::cout<<"track "<<itk<<std::endl;
       const auto &tk = track[itk];
       if (tk.floatPt() <= cfg.trkQualityPtMin)
         continue;
@@ -292,7 +285,6 @@ void PFTkEGAlgoEmulator::link_emCalo2tk_composite(const PFRegionEmu &r,
         candidates.push_back(cand);
       }
     }
-    std::cout << "Constructed candidates, now sorting" << std::endl;
     // FIXME: find best sort criteria, for now we use dpt
     std::sort(candidates.begin(),
               candidates.end(),
@@ -385,7 +377,6 @@ void PFTkEGAlgoEmulator::run(const PFInputRegion &in, OutputRegion &out) const {
 
   std::vector<int> emCalo2tk(emcalo_sel.size(), -1);
   std::vector<float> emCaloTkBdtScore(emcalo_sel.size(), -999);
-  std::cout<<"about to start matching"<<std::endl;
 
   if (cfg.doCompositeTkEle) {
     link_emCalo2tk_composite(in.region, emcalo_sel, in.track, emCalo2tk, emCaloTkBdtScore);
@@ -398,7 +389,7 @@ void PFTkEGAlgoEmulator::run(const PFInputRegion &in, OutputRegion &out) const {
   } else {
     link_emCalo2tk_elliptic(in.region, emcalo_sel, in.track, emCalo2tk);
   }
-  
+
   out.egsta.clear();
   std::vector<EGIsoObjEmu> egobjs;
   std::vector<EGIsoEleObjEmu> egeleobjs;

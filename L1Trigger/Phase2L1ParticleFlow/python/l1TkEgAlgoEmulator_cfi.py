@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import math 
 
 tkEgAlgoParameters = cms.PSet(
     nTRACK=cms.uint32(50),  # very large numbers for first test

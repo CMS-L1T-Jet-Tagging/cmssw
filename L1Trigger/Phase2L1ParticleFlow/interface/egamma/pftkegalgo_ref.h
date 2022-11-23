@@ -168,6 +168,7 @@ namespace l1ct {
   private:
 
 
+  private:
     void link_emCalo2emCalo(const std::vector<EmCaloObjEmu> &emcalo, std::vector<int> &emCalo2emCalo) const;
 
     void link_emCalo2tk_elliptic(const PFRegionEmu &r,

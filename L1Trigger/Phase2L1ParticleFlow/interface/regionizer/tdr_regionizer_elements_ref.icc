@@ -265,6 +265,39 @@ bool l1ct::tdr_regionizer::Regionizer<T>::sortSectors(size_t a, size_t b) const 
   return sortRegionsHelper(etaa, etab, phia, phib);
 }
 
+
+// this function is for sorting small regions first
+// in phi and then in eta.
+template <typename T>
+bool l1ct::tdr_regionizer::Regionizer<T>::sortRegionsRegular(size_t a, size_t b) const {
+  auto phia = regions_[a].intPhiCenter();
+  auto phib = regions_[b].intPhiCenter();
+  if (bigRegionMax_ < bigRegionMin_) {
+    // the wraparound case
+    if (phia > bigRegionMin_ && phib < bigRegionMax_) {
+      return true;
+    } else if (phib > bigRegionMin_ && phia < bigRegionMax_) {
+      return false;
+    }
+  }
+  // regular phi
+  if (phia < phib) {
+    return true;
+  } else if (phia > phib) {
+    return false;
+  }
+
+  // if here, then phia == phib, move to eta
+  auto etaa = regions_[a].intEtaCenter();
+  auto etab = regions_[b].intEtaCenter();
+  if (etaa < etab) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
 template <typename T>
 void l1ct::tdr_regionizer::Regionizer<T>::initRegions(const std::vector<PFInputRegion>& regions) {
   regions_.resize(regions.size());

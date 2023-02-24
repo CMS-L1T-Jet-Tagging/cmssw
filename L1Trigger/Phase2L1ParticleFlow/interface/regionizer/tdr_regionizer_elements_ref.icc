@@ -267,9 +267,19 @@ bool l1ct::tdr_regionizer::Regionizer<T>::sortSectors(size_t a, size_t b) const 
 
 
 // this function is for sorting small regions first
-// in phi and then in eta.
+// in eta first, then in phi
 template <typename T>
 bool l1ct::tdr_regionizer::Regionizer<T>::sortRegionsRegular(size_t a, size_t b) const {
+  // first do eta
+  auto etaa = regions_[a].intEtaCenter();
+  auto etab = regions_[b].intEtaCenter();
+  if (etaa < etab) {
+    return true;
+  } else if (etaa > etab) {
+    return false;
+  }
+
+  // if here, then etaa == etab, move to phi
   auto phia = regions_[a].intPhiCenter();
   auto phib = regions_[b].intPhiCenter();
   if (bigRegionMax_ < bigRegionMin_) {
@@ -282,15 +292,6 @@ bool l1ct::tdr_regionizer::Regionizer<T>::sortRegionsRegular(size_t a, size_t b)
   }
   // regular phi
   if (phia < phib) {
-    return true;
-  } else if (phia > phib) {
-    return false;
-  }
-
-  // if here, then phia == phib, move to eta
-  auto etaa = regions_[a].intEtaCenter();
-  auto etab = regions_[b].intEtaCenter();
-  if (etaa < etab) {
     return true;
   } else {
     return false;
@@ -320,7 +321,8 @@ void l1ct::tdr_regionizer::Regionizer<T>::initRegions(const std::vector<PFInputR
 }
 
 template <typename T>
-bool l1ct::tdr_regionizer::Regionizer<T>::isInBigRegion(const PFRegionEmu& reg) const {
+bool l1ct::tdr_regionizer::Regionizer<T>::isInBigRegion(const PFRegionEmu& reg) const
+{
   auto phi = reg.intPhiCenter();
   if (bigRegionMax_ < bigRegionMin_) {
     // the wraparound case
@@ -416,6 +418,7 @@ void l1ct::tdr_regionizer::Regionizer<T>::setBuffers(const std::vector<std::vect
   }
 }
 
+// NEED TO CHECK CONSTANTS HERE
 template <typename T>
 void l1ct::tdr_regionizer::Regionizer<T>::addToSmallRegion(l1ct::tdr_regionizer::PipeEntry<T>&& pipeEntry) {
   if (pipeEntry.valid()) {
@@ -617,4 +620,32 @@ std::vector<std::vector<T>> l1ct::tdr_regionizer::Regionizer<T>::fillLinks(const
     links.back().push_back(sector[io]);
   }
   return links;
+}
+
+template <typename T>
+void l1ct::tdr_regionizer::Regionizer<T>::printDebug(int count) const {
+  dbgCout() << "PIPES, (for " << getSize() << " sectors)" << std::endl;
+  dbgCout() << count << "\tsector\titem\tpt\teta\tphi" << std::endl;
+  for (unsigned int sector = 0; sector < getSize(); sector++) {
+    for (unsigned int j = 0; j < getPipeSize(sector); j++) {
+      dbgCout() << "\t" << sector << "\t" << j << "\t" << getPipe(sector).getPt(j) << "\t" << getPipe(sector).getGlbEta(j) << "\t"
+                << getPipe(sector).getGlbPhi(j) << std::endl;
+    }
+    dbgCout() << "-------------------------------" << std::endl;
+  }
+  dbgCout() << "SMALL REGIONS" << std::endl;
+  for (unsigned int region = 0; region < neta_*nphi_; region++) {
+    dbgCout() << count << "\tregion\titem\tpt\tloceta\tlocphi" << std::endl;
+    for (unsigned int j = 0; j < smallRegionObjects_[region].size(); j++) {
+      dbgCout() << "\t" << region << " " << j << "\t" << smallRegionObjects_[region][j].hwPt.to_int() << "\t"
+                << smallRegionObjects_[region][j].hwEta.to_int() << "\t"
+                << smallRegionObjects_[region][j].hwPhi.to_int() << std::endl;
+    }
+    dbgCout() << "-------------------------------" << std::endl;
+  }
+  dbgCout() << "TIMES" << std::endl;
+  for (unsigned int i = 0; i < timeOfNextObject_.size(); i++) {
+    dbgCout() << "  " << timeOfNextObject_[i];
+  }
+  dbgCout() << "\n-------------------------------" << std::endl;
 }

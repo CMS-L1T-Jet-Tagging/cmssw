@@ -628,8 +628,8 @@ void l1ct::tdr_regionizer::Regionizer<T>::printDebug(int count) const {
   dbgCout() << count << "\tsector\titem\tpt\teta\tphi" << std::endl;
   for (unsigned int sector = 0; sector < getSize(); sector++) {
     for (unsigned int j = 0; j < getPipeSize(sector); j++) {
-      dbgCout() << "\t" << sector << "\t" << j << "\t" << getPipe(sector).getPt(j) << "\t" << getPipe(sector).getGlbEta(j) << "\t"
-                << getPipe(sector).getGlbPhi(j) << std::endl;
+      dbgCout() << "\t" << sector << "\t" << j << "\t" << pipes_[sector].getPt(j) << "\t" << pipes_[sector].getGlbEta(j) << "\t"
+                << pipes_[sector].getGlbPhi(j) << std::endl;
     }
     dbgCout() << "-------------------------------" << std::endl;
   }

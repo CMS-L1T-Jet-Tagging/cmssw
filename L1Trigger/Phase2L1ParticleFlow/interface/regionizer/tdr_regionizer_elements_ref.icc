@@ -265,7 +265,6 @@ bool l1ct::tdr_regionizer::Regionizer<T>::sortSectors(size_t a, size_t b) const 
   return sortRegionsHelper(etaa, etab, phia, phib);
 }
 
-
 // this function is for sorting small regions first
 // in eta first, then in phi
 template <typename T>
@@ -298,7 +297,6 @@ bool l1ct::tdr_regionizer::Regionizer<T>::sortRegionsRegular(size_t a, size_t b)
   }
 }
 
-
 template <typename T>
 void l1ct::tdr_regionizer::Regionizer<T>::initRegions(const std::vector<PFInputRegion>& regions) {
   regions_.resize(regions.size());
@@ -321,8 +319,7 @@ void l1ct::tdr_regionizer::Regionizer<T>::initRegions(const std::vector<PFInputR
 }
 
 template <typename T>
-bool l1ct::tdr_regionizer::Regionizer<T>::isInBigRegion(const PFRegionEmu& reg) const
-{
+bool l1ct::tdr_regionizer::Regionizer<T>::isInBigRegion(const PFRegionEmu& reg) const {
   auto phi = reg.intPhiCenter();
   if (bigRegionMax_ < bigRegionMin_) {
     // the wraparound case
@@ -628,13 +625,13 @@ void l1ct::tdr_regionizer::Regionizer<T>::printDebug(int count) const {
   dbgCout() << count << "\tsector\titem\tpt\teta\tphi" << std::endl;
   for (unsigned int sector = 0; sector < getSize(); sector++) {
     for (unsigned int j = 0; j < getPipeSize(sector); j++) {
-      dbgCout() << "\t" << sector << "\t" << j << "\t" << pipes_[sector].getPt(j) << "\t" << pipes_[sector].getGlbEta(j) << "\t"
-                << pipes_[sector].getGlbPhi(j) << std::endl;
+      dbgCout() << "\t" << sector << "\t" << j << "\t" << pipes_[sector].getPt(j) << "\t" << pipes_[sector].getGlbEta(j)
+                << "\t" << pipes_[sector].getGlbPhi(j) << std::endl;
     }
     dbgCout() << "-------------------------------" << std::endl;
   }
   dbgCout() << "SMALL REGIONS" << std::endl;
-  for (unsigned int region = 0; region < neta_*nphi_; region++) {
+  for (unsigned int region = 0; region < neta_ * nphi_; region++) {
     dbgCout() << count << "\tregion\titem\tpt\tloceta\tlocphi" << std::endl;
     for (unsigned int j = 0; j < smallRegionObjects_[region].size(); j++) {
       dbgCout() << "\t" << region << " " << j << "\t" << smallRegionObjects_[region][j].hwPt.to_int() << "\t"

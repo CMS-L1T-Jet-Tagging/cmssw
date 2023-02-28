@@ -265,7 +265,7 @@ namespace l1ct {
 
       /// Because some SRs share pipes, this determines the pipe index for a linearize SR index
       /// (This is based on the VHDL function, get_target_pipe_index_subindex)
-      size_t getHardwarePipeIndex(size_t srIndex) const {return srIndex / SRS_PER_RAM;}
+      size_t getHardwarePipeIndex(size_t srIndex) const { return srIndex / SRS_PER_RAM; }
 
       // this function is for sorting small regions first in phi and then in eta.
       // It takes regions_ indices

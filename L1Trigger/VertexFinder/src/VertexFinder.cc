@@ -871,6 +871,8 @@ namespace l1tVertexFinder {
         // Biased generation f(x) = 1 / (x + 1) is inverted by g(y) = inversion(x - 1) = 1 / (x - 1 + 1) = 1 / y
         table_out.at(ii) = (1.0 / (ii + 1));
       }
+      //explicitly set boundary to ensure weighted position doesn't exceed window, consistent with previous implementation of 1/(ii+1)
+      table_out.at(kTableSize - 1) = 1.0 / (kTableSize);
       return table_out;
     };
 

@@ -200,7 +200,6 @@ void L1NNTauProducer::makeTau_HW(const l1t::PFCandidate& seed,
   L1TauEmu::detaphi_t rCone2 =
       L1TauEmu::detaphi_t(fTauSize_ * fTauSize_ * L1TauEmu::etaphi_base * L1TauEmu::etaphi_base);
   unsigned lId = 0;
-
   input2_t p1_tot = 0;
   input2_t p1x_tot = 0;
   input2_t p1y_tot = 0;

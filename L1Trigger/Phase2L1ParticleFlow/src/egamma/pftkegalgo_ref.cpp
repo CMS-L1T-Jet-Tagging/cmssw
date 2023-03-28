@@ -145,7 +145,7 @@ PFTkEGAlgoEmulator::PFTkEGAlgoEmulator(const PFTkEGAlgoEmuConfig &config)
 #else
     auto resolvedFileName = cfg.compIDparams.conifer_model;
 #endif
-    composite_bdt_ = new conifer::BDT<bdt_feature_t, ap_fixed<12, 3, AP_RND_CONV, AP_SAT>, false>(resolvedFileName);
+    composite_bdt_ = new conifer::BDT<bdt_feature_t, bdt_score_t, false>(resolvedFileName);
   }
 }
 

@@ -258,6 +258,12 @@ l1tLayer1HGCal = cms.EDProducer("L1TCorrelatorLayer1Producer",
     writeRawHgcalCluster = cms.untracked.bool(True)
 )
 
+l1tLayer1HGCalElliptic = l1tLayer1HGCal.clone(
+    tkEgAlgoParameters = l1tLayer1HGCal.tkEgAlgoParameters.clone(
+        doCompositeTkEle = False,
+        trkQualityPtMin = 10.)
+)
+
 l1tLayer1HGCalExtended = l1tLayer1HGCal.clone(tracks = cms.InputTag('l1tPFTracksFromL1TracksExtended'))
 
 l1tLayer1HGCalExtended = l1tLayer1HGCal.clone(tracks = ('l1tPFTracksFromL1TracksExtended'))

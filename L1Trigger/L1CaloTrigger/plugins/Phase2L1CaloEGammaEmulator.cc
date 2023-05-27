@@ -64,6 +64,8 @@ public:
 
   static void fillDescriptions(edm::ConfigurationDescriptions&);
 
+  static void fillDescriptions(edm::ConfigurationDescriptions&);
+
 private:
   void produce(edm::Event&, const edm::EventSetup&) override;
 

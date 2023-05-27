@@ -1,8 +1,8 @@
 //------------------------------------
 // Helper functions for Phase2L1CaloEGammaEmulator.cc
 //------------------------------------
-#ifndef L1Trigger_L1CaloTrigger_Phase2L1CaloEGammaUtils
-#define L1Trigger_L1CaloTrigger_Phase2L1CaloEGammaUtils
+#ifndef L1Trigger_L1CaloTrigger_Phase2L1CaloEGammaUtils_h
+#define L1Trigger_L1CaloTrigger_Phase2L1CaloEGammaUtils_h
 
 #include <ap_int.h>
 #include <cstdio>
@@ -82,11 +82,12 @@ namespace p2eg {
   static constexpr int N_GCTETA = 34;
   static constexpr int N_GCTPHI = 32;
 
-  // for emulator: "top" of the GCT card in phi is tower idx 20, for GCT card #0:
-  static constexpr int GCTCARD_0_TOWER_IPHI_OFFSET = 20;
-  // same but for GCT cards #1 and 2 (cards wrap around phi = 180 degrees):
-  static constexpr int GCTCARD_1_TOWER_IPHI_OFFSET = 44;
-  static constexpr int GCTCARD_2_TOWER_IPHI_OFFSET = 68;
+  static constexpr int GCTCARD_0_TOWER_IPHI_OFFSET =
+      20;  // for emulator: "top" of the GCT card in phi is tower idx 20, for GCT card #0
+  static constexpr int GCTCARD_1_TOWER_IPHI_OFFSET =
+      44;  // same but for GCT card #1 (card #1 wraps around phi = 180 degrees)
+  static constexpr int GCTCARD_2_TOWER_IPHI_OFFSET =
+      68;  // same for GCT card #2 (card #2 also wraps around phi = 180 degrees)
 
   static constexpr int N_GCTTOWERS_CLUSTER_ISO_ONESIDE = 5;  // window size of isolation sum (5x5 in towers)
 
@@ -835,7 +836,6 @@ namespace p2eg {
             ap_uint<15> clusterEt5x5 = 0,
             ap_uint<15> clusterEt2x5 = 0,
             ap_uint<2> clusterBrems = 0,
-            float clusterCalib = 1.0,
             bool cluster_is_ss = false,
             bool cluster_is_looseTkss = false,
             bool cluster_is_iso = false,
@@ -846,7 +846,6 @@ namespace p2eg {
       regionIdx = clusterRegionIdx, et5x5 = clusterEt5x5;
       et2x5 = clusterEt2x5;
       brems = clusterBrems;
-      calib = clusterCalib;
       is_ss = cluster_is_ss;
       is_looseTkss = cluster_is_looseTkss;
       is_iso = cluster_is_iso;
@@ -991,42 +990,36 @@ namespace p2eg {
   /*******************************************************************/
   inline bool passes_iso(float pt, float iso) {
     bool is_iso = true;
-    if (pt > 130)
-      is_iso = true;
-    else if (pt < slideIsoPtThreshold) {
+    if (pt < slideIsoPtThreshold) {
       if (!((a0_80 - a1_80 * pt) > iso))
         is_iso = false;
     } else {
       if (iso > a0)
         is_iso = false;
     }
+    if (pt > 130)
+      is_iso = true;
     return is_iso;
   }
 
   inline bool passes_looseTkiso(float pt, float iso) {
-    bool is_iso;
+    bool is_iso = (b0 + b1 * std::exp(-b2 * pt) > iso);
     if (pt > 130)
       is_iso = true;
-    else
-      is_iso = (b0 + b1 * std::exp(-b2 * pt) > iso);
     return is_iso;
   }
 
   inline bool passes_ss(float pt, float ss) {
-    bool is_ss;
+    bool is_ss = ((c0_ss + c1_ss * std::exp(-c2_ss * pt)) <= ss);
     if (pt > 130)
       is_ss = true;
-    else
-      is_ss = ((c0_ss + c1_ss * std::exp(-c2_ss * pt)) <= ss);
     return is_ss;
   }
 
   inline bool passes_looseTkss(float pt, float ss) {
-    bool is_ss;
+    bool is_ss = ((e0_looseTkss - e1_looseTkss * std::exp(-e2_looseTkss * pt)) <= ss);
     if (pt > 130)
       is_ss = true;
-    else
-      is_ss = ((e0_looseTkss - e1_looseTkss * std::exp(-e2_looseTkss * pt)) <= ss);
     return is_ss;
   }
 
@@ -1442,8 +1435,8 @@ namespace p2eg {
       else if (nGCTCard == 2)
         toweriPhi_card_offset = GCTCARD_2_TOWER_IPHI_OFFSET;
 
-      //  as explained above, effectiveFiberIdx is [0, 32). n_towers_Phi = 72:
-      int global_tower_iPhi = (toweriPhi_card_offset + effectiveFiberIdx) % (n_towers_Phi);
+      int global_tower_iPhi = (toweriPhi_card_offset + effectiveFiberIdx) %
+                              (n_towers_Phi);  //  as explained above, effectiveFiberIdx is [0, 32). n_towers_Phi = 72
       return global_tower_iPhi;
     }
 

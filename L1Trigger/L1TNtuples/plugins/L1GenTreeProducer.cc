@@ -58,7 +58,7 @@ Implementation:
 // class declaration
 //
 
-class L1GenTreeProducer : public edm::one::EDAnalyzer<edm::one::SharedResources>{
+class L1GenTreeProducer : public edm::one::EDAnalyzer<> {
 public:
   explicit L1GenTreeProducer(const edm::ParameterSet&);
   ~L1GenTreeProducer() override;

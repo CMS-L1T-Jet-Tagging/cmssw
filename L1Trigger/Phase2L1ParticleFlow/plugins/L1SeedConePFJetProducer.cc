@@ -26,8 +26,6 @@ public:
   ~L1SeedConePFJetProducer() override;
   static void fillDescriptions(edm::ConfigurationDescriptions& description);
 
-  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-
 private:
   /// ///////////////// ///
   /// MANDATORY METHODS ///

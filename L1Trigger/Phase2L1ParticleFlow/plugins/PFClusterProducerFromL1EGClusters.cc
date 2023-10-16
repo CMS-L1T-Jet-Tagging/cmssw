@@ -91,21 +91,6 @@ void l1tpf::PFClusterProducerFromL1EGClusters::produce(edm::Event &iEvent, const
     out_sel->push_back(cluster);
     out_sel->back().addConstituent(edm::Ptr<l1t::L1Candidate>(clusters, theIndex));
   }
-  std::vector<unsigned int> indices = selector.returnSorted();
-  for (unsigned int ii = 0; ii < indices.size(); ii++) {
-    unsigned int theIndex = indices[ii];
-    l1t::PFCluster cluster((clusters->begin() + theIndex)->pt(),
-                           (clusters->begin() + theIndex)->eta(),
-                           (clusters->begin() + theIndex)->phi(),
-                           /*hOverE=*/0.,
-                           /*isEM=*/true);  // it->hovere() seems to return random values
-    if (corrector_.valid())
-      corrector_.correctPt(cluster);
-    cluster.setPtError(resol_(cluster.pt(), std::abs(cluster.eta())));
-    cluster.setHwQual((clusters->begin() + theIndex)->hwQual());
-    out_sel->push_back(cluster);
-    out_sel->back().addConstituent(edm::Ptr<l1t::L1Candidate>(clusters, theIndex));
-  }
 
   iEvent.put(std::move(out), "all");
   iEvent.put(std::move(out_sel), "selected");

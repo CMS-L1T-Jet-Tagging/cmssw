@@ -33,7 +33,7 @@ namespace l1t::demo::codecs {
   }
 
   std::vector<l1t::EtSum> decodeHtSums(const std::vector<ap_uint<64>>& frames) {
-    std::vector<l1t::EtSum> etSums;
+    std::vector<l1t::EtSum> htSums;
 
     for (const auto& x : frames) {
       if (not x.test(0))
@@ -49,7 +49,7 @@ namespace l1t::demo::codecs {
       htSums.push_back(s);
     }
 
-    return etSums;
+    return htSums;
   }
 
 }  // namespace l1t::demo::codecs

@@ -17,6 +17,7 @@ class DeregionizerProducer : public edm::stream::EDProducer<> {
 public:
   explicit DeregionizerProducer(const edm::ParameterSet &);
   ~DeregionizerProducer() override;
+  static void fillDescriptions(edm::ConfigurationDescriptions &descriptions);
 
 private:
   edm::ParameterSet config_;

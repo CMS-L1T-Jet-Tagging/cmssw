@@ -137,18 +137,6 @@ PFTkEGAlgoEmulator::PFTkEGAlgoEmulator(const PFTkEGAlgoEmuConfig &config)
   }
 }
 
-PFTkEGAlgoEmulator::PFTkEGAlgoEmulator(const PFTkEGAlgoEmuConfig &config)
-    : cfg(config), composite_bdt_(nullptr), debug_(cfg.debug) {
-  if (cfg.doCompositeTkEle) {
-#ifdef CMSSW_GIT_HASH
-    auto resolvedFileName = edm::FileInPath(cfg.compIDparams.conifer_model).fullPath();
-#else
-    auto resolvedFileName = cfg.compIDparams.conifer_model;
-#endif
-    composite_bdt_ = new conifer::BDT<bdt_feature_t, bdt_score_t, false>(resolvedFileName);
-  }
-}
-
 void PFTkEGAlgoEmulator::toFirmware(const PFInputRegion &in,
                                     PFRegion &region,
                                     EmCaloObj emcalo[/*nCALO*/],

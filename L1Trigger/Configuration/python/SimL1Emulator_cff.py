@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 # Defines the L1 Emulator sequence for simulation use-case subsystem emulators
 # run on the results of previous (in the hardware chain) subsystem emulator:
-#  
+#
 #     SimL1Emulator = cms.Sequence(...)
 #
 # properly configured for the current Era (e.g. Run1, 2015, or 2016).  Also
@@ -17,7 +17,7 @@ import FWCore.ParameterSet.Config as cms
 
 # Notes on Inputs:
 
-# ECAL TPG emulator and HCAL TPG run in the simulation sequence in order to be able 
+# ECAL TPG emulator and HCAL TPG run in the simulation sequence in order to be able
 # to use unsuppressed digis produced by ECAL and HCAL simulation, respectively
 # in Configuration/StandardSequences/python/Digi_cff.py
 # SimCalorimetry.Configuration.SimCalorimetry_cff
@@ -30,10 +30,10 @@ import FWCore.ParameterSet.Config as cms
 # so these missing (required!) inputs are presently ignored by downstream modules.
 #
 
+from L1Trigger.Configuration.SimL1TechnicalTriggers_cff import *
+
 from L1Trigger.L1TCalorimeter.simDigis_cff import *
 from L1Trigger.L1TMuon.simDigis_cff import *
-from L1Trigger.Configuration.SimL1TechnicalTriggers_cff import *
-from L1Trigger.L1TZDC.L1TZDCEmulation_cff import *
 from L1Trigger.L1TGlobal.simDigis_cff import *
 
 # define a core which can be extented in customizations:
@@ -41,7 +41,6 @@ SimL1EmulatorCoreTask = cms.Task(
     SimL1TCalorimeterTask,
     SimL1TMuonTask,
     SimL1TechnicalTriggersTask,
-    L1TZDCEmulationTask,
     SimL1TGlobalTask
 )
 SimL1EmulatorCore = cms.Sequence(SimL1EmulatorCoreTask)
@@ -49,7 +48,7 @@ SimL1EmulatorCore = cms.Sequence(SimL1EmulatorCoreTask)
 SimL1EmulatorTask = cms.Task(SimL1EmulatorCoreTask)
 SimL1Emulator = cms.Sequence( SimL1EmulatorTask )
 
-# 
+#
 # Emulators are configured from DB (GlobalTags)
 #
 
@@ -64,7 +63,7 @@ _phase2_siml1emulator = SimL1EmulatorTask.copy()
 # ########################################################################
 # ########################################################################
 #
-# Phase-2 
+# Phase-2
 #
 # ########################################################################
 # ########################################################################
@@ -78,11 +77,11 @@ _phase2_siml1emulator.add(CalibratedDigis)
 from L1Trigger.DTTriggerPhase2.dtTriggerPhase2PrimitiveDigis_cfi import *
 _phase2_siml1emulator.add(dtTriggerPhase2PrimitiveDigis)
 
-# HGCAL TP 
+# HGCAL TP
 # ########################################################################
 from  L1Trigger.L1THGCal.hgcalTriggerPrimitives_cff import *
 _phase2_siml1emulator.add(L1THGCalTriggerPrimitivesTask)
- 
+
 # ########################################################################
 # Phase 2 L1T
 # ########################################################################
@@ -112,7 +111,7 @@ l1tCaloJet = l1tCaloJetProducer.clone (
 # ----    Produce the simulated CaloJet HTT Sums
 from L1Trigger.L1CaloTrigger.l1tCaloJetHTTProducer_cfi import *
 l1tCaloJetHTT = l1tCaloJetHTTProducer.clone(
-    BXVCaloJetsInputTag = ("L1CaloJet", "CaloJets") 
+    BXVCaloJetsInputTag = ("L1CaloJet", "CaloJets")
 )
 # ----    Produce the NNCaloTau
 from L1Trigger.L1CaloTrigger.l1tNNCaloTauProducer_cfi import *
@@ -127,11 +126,14 @@ from L1Trigger.L1CaloTrigger.l1tPhase2CaloJetEmulator_cff import *
 _phase2_siml1emulator.add(l1tTowerCalibration)
 _phase2_siml1emulator.add(l1tCaloJet)
 _phase2_siml1emulator.add(l1tCaloJetHTT)
-_phase2_siml1emulator.add(l1tCaloJetsTausTask)
+_phase2_siml1emulator.add(L1TCaloJetsTausTask)
 
 # Overlap and EndCap Muon Track Finder
 # ########################################################################
-from L1Trigger.L1TMuonOverlapPhase2.simOmtfPhase2Digis_cfi import *
+from L1Trigger.L1TMuonOverlapPhase2.fakeOmtfParamsPhase2_cff import *
+from L1Trigger.L1TMuonOverlapPhase2.simOmtfPhase2Digis_extrapol_cfi import *
+#_phase2_siml1emulator.add(omtfParamsSource)
+_phase2_siml1emulator.add(omtfParamsPhase2)
 _phase2_siml1emulator.add(simOmtfPhase2Digis)
 
 from L1Trigger.L1TMuonEndCapPhase2.simCscTriggerPrimitiveDigisForEMTF_cfi import *
@@ -192,11 +194,14 @@ from L1Trigger.L1TTrackMatch.l1tTrackFastJets_cfi import *
 from L1Trigger.L1TTrackMatch.l1tTrackerEtMiss_cfi import *
 from L1Trigger.L1TTrackMatch.l1tTrackerHTMiss_cfi import *
 
+
+
 #Selected and Associated tracks for Jets and Emulated Jets
 _phase2_siml1emulator.add(l1tTrackSelectionProducerForJets)
 _phase2_siml1emulator.add(l1tTrackSelectionProducerExtendedForJets)
 _phase2_siml1emulator.add(l1tTrackVertexAssociationProducerForJets)
 _phase2_siml1emulator.add(l1tTrackVertexAssociationProducerExtendedForJets)
+
 
 #Selected and Associated tracks for EtMiss and Emulated EtMiss
 _phase2_siml1emulator.add(l1tTrackSelectionProducerForEtMiss)
@@ -204,12 +209,14 @@ _phase2_siml1emulator.add(l1tTrackSelectionProducerExtendedForEtMiss)
 _phase2_siml1emulator.add(l1tTrackVertexAssociationProducerForEtMiss)
 _phase2_siml1emulator.add(l1tTrackVertexAssociationProducerExtendedForEtMiss)
 
+
 #Track Jets, Track Only Et Miss, Track Only HT Miss
 _phase2_siml1emulator.add(l1tTrackJets)
 _phase2_siml1emulator.add(l1tTrackJetsExtended)
 _phase2_siml1emulator.add(l1tTrackFastJets)
 _phase2_siml1emulator.add(l1tTrackerEtMiss)
 _phase2_siml1emulator.add(l1tTrackerHTMiss)
+
 
 #Emulated Track Jets, Track Only Et Miss, Track Only HT Miss
 from L1Trigger.L1TTrackMatch.l1tTrackJetsEmulation_cfi import *
@@ -245,8 +252,8 @@ from L1Trigger.L1CaloTrigger.Phase1L1TJets_9x9trimmed_cff import *
 L1TPFJetsPhase1Task_9x9trimmed = cms.Task(  l1tPhase1JetProducer9x9trimmed, l1tPhase1JetCalibrator9x9trimmed, l1tPhase1JetSumsProducer9x9trimmed)
 _phase2_siml1emulator.add(L1TPFJetsPhase1Task_9x9trimmed)
 
-from L1Trigger.Phase2L1ParticleFlow.l1tHPSPFTauProducer_cfi import *
-_phase2_siml1emulator.add(l1tHPSPFTauProducer)
+from L1Trigger.Phase2L1ParticleFlow.L1HPSPFTauProducer_cfi import *
+_phase2_siml1emulator.add(l1HPSPFTauEmuProducer)
 
 # PF MET
 # ########################################################################
@@ -268,6 +275,11 @@ _phase2_siml1emulator.add(l1tNNTauProducerPuppi)
 # ########################################################################
 from L1Trigger.Phase2L1ParticleFlow.L1BJetProducer_cff import *
 _phase2_siml1emulator.add(L1TBJetsTask)
+
+# MultiJets
+# ########################################################################
+from L1Trigger.Phase2L1ParticleFlow.L1MultiJetProducer_cff import *
+_phase2_siml1emulator.add(L1TMultiJetsTask)
 
 # LLPJets
 # ########################################################################

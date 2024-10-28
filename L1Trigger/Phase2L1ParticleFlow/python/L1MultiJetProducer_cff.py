@@ -8,7 +8,7 @@ l1tMultiJetProducerPuppi = L1MultiJetProducer.clone(
     maxJets = 16,
     minPt = 10,
     vtx = ("l1tVertexFinderEmulator","L1VerticesEmulation"),
-    MultiJetPath = cms.string("/builds/ml_l1/TrainTagger/CMSSW_14_0_0_pre3/src/hls4ml-jettagger/MultiJetBaseline")
+    MultiJetPath = cms.string("/eos/user/c/cebrown/Correlator/tempCMSSW/CMSSW_14_0_0_pre3/src/hls4ml-jettagger/MultiJetBaseline")
 )
 
 

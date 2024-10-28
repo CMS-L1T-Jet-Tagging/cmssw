@@ -17,21 +17,34 @@ public:
              int iNParticles);
   ~MultiJetId() = default;
 
+  typedef ap_fixed<16,6> inputtype;
+  typedef std::array<ap_fixed<16,6>, 8> classtype; 
+  typedef std::array<ap_fixed<16,6>, 1> regressiontype;
+  typedef std::pair<regressiontype, classtype> pairtype;
+
   void setNNVectorVar();
-  std::vector<ap_fixed<20, 9, AP_RND, AP_SAT>> EvaluateNNFixed();
-  std::vector<ap_fixed<20, 9, AP_RND, AP_SAT>> computeFixed(const l1t::PFJet &iJet, float vz, bool useRawPt);
+  std::vector<float> EvaluateNNFixed();
+  std::vector<float>  computeFixed(const l1t::PFJet &iJet, bool useRawPt);
 
 private:
-  std::vector<float> NNvectorVar_;
+  std::vector<inputtype> NNvectorVar_;
   int fNParticles_;
-  unique_ptr<float[]> fPt_;
-  unique_ptr<float[]> fEta_;
-  unique_ptr<float[]> fPhi_;
-  unique_ptr<float[]> fId_;
+  unique_ptr<float[]> fPt_rel_phys_;
+  unique_ptr<float[]> fDEta_phys_;
+  unique_ptr<float[]> fDPhi_phys_;
+  unique_ptr<float[]> fPt_log_;
+  unique_ptr<float[]> fEta_phys_;
+  unique_ptr<float[]> fPhi_phys_;
+  unique_ptr<float[]> fMass_;
+  unique_ptr<float[]> fZ0_;
+  unique_ptr<float[]> fDxy_phys_;
+  unique_ptr<int[]> fIs_filled_;
+  unique_ptr<float[]> fPuppi_weight_;
+  unique_ptr<int[]> fEmID_;
+  unique_ptr<float[]> fQuality_;
+
   unique_ptr<int[]> fCharge_;
-  unique_ptr<float[]> fDZ_;
-  unique_ptr<float[]> fDX_;
-  unique_ptr<float[]> fDY_;
+  unique_ptr<int[]> fId_;
   std::shared_ptr<hls4mlEmulator::Model> modelRef_;
 };
 #endif

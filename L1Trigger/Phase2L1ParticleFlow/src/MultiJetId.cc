@@ -141,7 +141,7 @@ std::vector<float> MultiJetId::computeFixed(const l1t::PFJet &iJet, bool useRawP
     fZ0_.get()[i0] = iParts[i0]->hwZ0();
     fDxy_phys_.get()[i0] = iParts[i0]->hwDxy();
     fIs_filled_.get()[i0] = 1;
-    fPuppi_weight_.get()[i0] = iParts[i0]->hwpuppiWeight();
+    fPuppi_weight_.get()[i0] = iParts[i0]->hwPuppiWeight();
     fEmID_.get()[i0] = iParts[i0]->hwEmID();
     fQuality_.get()[i0] = iParts[i0]->hwTkQuality();
 

@@ -17,9 +17,9 @@ public:
              int iNParticles);
   ~MultiJetId() = default;
 
-  typedef ap_fixed<16,6,AP_RND,AP_SAT> inputtype;
-  typedef std::array<ap_fixed<16,6,AP_RND,AP_SAT>, 8> classtype; 
-  typedef std::array<ap_fixed<16,6,AP_RND,AP_SAT>, 1> regressiontype;
+  typedef ap_fixed<15,12,AP_RND,AP_SAT> inputtype;
+  typedef std::array<ap_fixed<15,12,AP_RND,AP_SAT>, 8> classtype; 
+  typedef std::array<ap_fixed<15,12,AP_RND,AP_SAT>, 1> regressiontype;
   typedef std::pair<regressiontype, classtype> pairtype;
 
   void setNNVectorVar();

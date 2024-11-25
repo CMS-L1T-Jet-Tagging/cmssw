@@ -17,9 +17,9 @@ public:
              int iNParticles);
   ~MultiJetId() = default;
 
-  typedef ap_fixed<15,12,AP_RND,AP_SAT> inputtype;
-  typedef std::array<ap_ufixed<8,0,AP_RND,AP_SAT>, 8> classtype; 
-  typedef std::array<ap_fixed<10,6,AP_RND,AP_SAT>, 1> regressiontype;
+  typedef ap_fixed<15,12,AP_RND,AP_SAT,0> inputtype;
+  typedef std::array<ap_ufixed<8,0,AP_RND,AP_SAT,0>, 8> classtype; 
+  typedef std::array<ap_fixed<16,6>, 1> regressiontype;
   typedef std::pair<regressiontype, classtype> pairtype;
 
   void setNNVectorVar();
@@ -29,15 +29,14 @@ public:
 private:
   std::vector<inputtype> NNvectorVar_;
   int fNParticles_;
-  unique_ptr<float[]> fPt_rel_phys_;
-  unique_ptr<float[]> fDEta_phys_;
-  unique_ptr<float[]> fDPhi_phys_;
+  unique_ptr<float[]> fPt_;
+  unique_ptr<float[]> fPt_rel_;
+  unique_ptr<float[]> fDEta_;
+  unique_ptr<float[]> fDPhi_;
   unique_ptr<float[]> fPt_log_;
-  unique_ptr<float[]> fEta_phys_;
-  unique_ptr<float[]> fPhi_phys_;
   unique_ptr<float[]> fMass_;
   unique_ptr<float[]> fZ0_;
-  unique_ptr<float[]> fDxy_phys_;
+  unique_ptr<float[]> fDxy_;
   unique_ptr<int[]> fIs_filled_;
   unique_ptr<float[]> fPuppi_weight_;
   unique_ptr<int[]> fEmID_;

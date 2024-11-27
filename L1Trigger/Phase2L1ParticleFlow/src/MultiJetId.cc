@@ -110,14 +110,26 @@ std::vector<float> MultiJetId::computeFixed(const l1t::PFJet &iJet, bool useRawP
   std::sort(iParts.begin(), iParts.end(), [](edm::Ptr<l1t::PFCandidate> i, edm::Ptr<l1t::PFCandidate> j) {
     return (i->pt() > j->pt());
   });
-  float jetpt = useRawPt ? iJet.rawPt() : iJet.pt();
+
+  l1ct::Jet ctJet = l1ct::Jet::unpack(iJet.getHWJetCT());
+  float jet_pt_ = float(ctJet.hwPt);
+  float jet_eta_ = float(ctJet.hwEta);
+  float jet_phi_ = float(ctJet.hwPhi);
+
   for (unsigned int i0 = 0; i0 < iParts.size(); i0++) {
     if (i0 >= (unsigned int)fNParticles_)
       break;
     fPt_.get()[i0] = iParts[i0]->hwPt();
-    fPt_rel_.get()[i0] = iParts[i0]->hwPt() / jetpt;
-    fDEta_.get()[i0] = iJet.eta() - iParts[i0]->eta();
-    fDPhi_.get()[i0] = deltaPhi(iParts[i0]->phi(), iJet.phi());
+    fPt_rel_.get()[i0] = iParts[i0]->hwPt() / jet_pt_;
+
+    L1SCJetEmu::detaphi_t dphi(iParts[i0]->hwPhi() - jet_phi_);
+    // phi wrap
+    L1SCJetEmu::detaphi_t dphi0 = dphi > L1SCJetEmu::detaphi_t(l1ct::Scales::INTPHI_PI) ? L1SCJetEmu::detaphi_t(l1ct::Scales::INTPHI_TWOPI - dphi) : L1SCJetEmu::detaphi_t(dphi);
+    L1SCJetEmu::detaphi_t dphi1 = dphi < L1SCJetEmu::detaphi_t(-l1ct::Scales::INTPHI_PI) ? L1SCJetEmu::detaphi_t(l1ct::Scales::INTPHI_TWOPI + dphi) : L1SCJetEmu::detaphi_t(dphi);
+    L1SCJetEmu::detaphi_t dphiw = dphi > L1SCJetEmu::detaphi_t(0) ? dphi0 : dphi1;
+
+    fDEta_.get()[i0] = jet_eta_-float(iParts[i0]->hwEta());
+    fDPhi_.get()[i0] = dphiw;
 
     fPt_log_.get()[i0] = std::log(iParts[i0]->hwPt());
 

@@ -56,25 +56,19 @@ namespace l1ct {
 
     // Default constructor
     Jet() {
+      
       // Copy the default values to the array
       for(unsigned i = 0; i < NTagFields; i++) {
           tagClassesArray[i] = tagClassesDefault_[i];
       }
+
       hwPt = 0;
       hwEta = 0;
       hwPhi = 0;
       hwZ0 = 0;
+
       // Initialize tag scores to 0
       for(unsigned i = 0; i < NTagFields; i++) {
-          hwTagScores[i] = 0;
-      }
-    }
-
-    // Constructor for brace initialization with 3 parameters
-    Jet(pt_t pt, glbeta_t eta, glbphi_t phi) : hwPt(pt), hwEta(eta), hwPhi(phi), hwZ0(0) {
-      // Copy the default values to the array
-      for(unsigned i = 0; i < NTagFields; i++) {
-          tagClassesArray[i] = tagClassesDefault_[i];
           hwTagScores[i] = 0;
       }
     }

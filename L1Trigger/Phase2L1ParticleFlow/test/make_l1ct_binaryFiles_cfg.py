@@ -30,7 +30,7 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True), allowUnscheduled = cms.untracked.bool(False) )
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1008))
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 # process.MessageLogger.cerr.threshold = "DEBUG"
 # process.MessageLogger.debugModules = ["l1tLayer1BarrelTDR"]
@@ -82,7 +82,7 @@ process.L1TInputTask = cms.Task(
 from L1Trigger.Phase2L1ParticleFlow.l1tJetFileWriter_cfi import l1tSeededConeJetFileWriter
 l1ctLayer2SCJetsProducts = cms.VPSet([cms.PSet(jets = cms.InputTag("l1tSC4NGJetProducer","l1tSC4NGJets"),
                                                nJets = cms.uint32(12),
-                                               mht  = cms.InputTag("l1tSC4PFL1PuppiCorrectedEmulatorMHT"),
+                                               mht = cms.InputTag("l1tMHTPFProducer"),
                                                nSums = cms.uint32(2)),
                                       cms.PSet(jets = cms.InputTag("l1tSC8PFL1PuppiCorrectedEmulator"),
                                                nJets = cms.uint32(12))
@@ -189,6 +189,14 @@ if not args.patternFilesOFF:
 
 process.l1tSC4NGJetProducer.jets = cms.InputTag("l1tSC4PFL1PuppiCorrectedEmulator")
 
+process.l1tSC4NGJetProducer.jets = cms.InputTag("l1tSC4PFL1PuppiEmulator")
+process.l1tSC4NGJetProducer.doJEC = cms.bool(True)
+process.l1tSC4NGJetProducer.correctorFile = cms.string("L1Trigger/Phase2L1ParticleFlow/data/jecs/jecs_20220308.root")
+process.l1tSC4NGJetProducer.correctorDir = cms.string("L1PuppiSC4EmuJets")
+
+from L1Trigger.Phase2L1ParticleFlow.l1tMHTPFProducer_cfi import l1tMHTPFProducer
+process.l1tMHTPFProducer.jets = cms.InputTag("l1tSC4NGJetProducer","l1tSC4NGJets")
+
 process.runPF = cms.Path( 
         process.l1tGTTInputProducer +
         process.l1tTrackSelectionProducer +
@@ -203,7 +211,9 @@ process.runPF = cms.Path(
         process.l1tLayer1 +
         process.l1tLayer2Deregionizer +
         process.l1tSC4PFL1PuppiCorrectedEmulator +
+        process.l1tSC4PFL1PuppiEmulator +
         process.l1tSC4NGJetProducer +
+        process.l1tMHTPFProducer +
         process.l1tSC4PFL1PuppiCorrectedEmulatorMHT +
         process.l1tSC8PFL1PuppiCorrectedEmulator +
         # process.l1tLayer2SeedConeJetWriter +

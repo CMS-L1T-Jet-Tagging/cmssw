@@ -90,10 +90,12 @@ void L1TSC4NGJetProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     }
     L1TSC4NGJetID::outputpairtype JetModel_output = fJetId_->computeFixed(srcjet);
     std::vector<float> JetScore_float;
-    for (unsigned i = 0; i < classes_.size(); i++) {
+    for (unsigned i = 0; i < classes_.size() - 1; i++) {
       ctHWTaggedJet.hwTagScores[i] = JetModel_output.second[i];
       JetScore_float.push_back((float)JetModel_output.second[i]);
     }
+    ctHWTaggedJet.hwTagScores[8] = JetModel_output.first[0];
+    JetScore_float.push_back((float)JetModel_output.first[0]);
     L1TSC4NGJetID::output_regression_type PtCorrection_ = JetModel_output.first[0];
     L1TSC4NGJetID::output_regression_type tempPt = ctHWTaggedJet.hwPt;
 
@@ -102,18 +104,19 @@ void L1TSC4NGJetProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     l1ct::glbeta_t max_eta = fMaxEta_ / l1ct::Scales::ETAPHI_LSB;
     // If we want to update the hwPt of the jet?
     if (!returnRawPt_) {
-      if (eta_abs < max_eta && ctHWTaggedJet.hwPt > l1ct::Scales::makePt(fMinPt_)) {
+      if (eta_abs < max_eta && ctHWTaggedJet.hwPt > 15) {
         tempPt = ctHWTaggedJet.hwPt * PtCorrection_;
       } else {
         //If outside of the eta and pt range, clear out the tag scores
         JetScore_float.clear();
-        for (unsigned i = 0; i < classes_.size(); i++) {
+        for (unsigned i = 0; i < classes_.size() + 1; i++) {
           ctHWTaggedJet.hwTagScores[i] = 0;
           JetScore_float.push_back(0);
         }
 
         if (doJEC) {
-          float correctedPt = corrector->correctedPt(ctHWTaggedJet.floatPt(), ctHWTaggedJet.floatEta());
+          // float correctedPt = corrector->correctedPt(ctHWTaggedJet.floatPt(), ctHWTaggedJet.floatEta());
+          float correctedPt = 0;
           tempPt = correctedPt;
         }
       }
@@ -121,7 +124,6 @@ void L1TSC4NGJetProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
     ctHWTaggedJet.hwPt = l1ct::pt_t(tempPt);
     l1gt::Jet gtHWTaggedJet = ctHWTaggedJet.toGT();
-    // TODO set the regressed pT instead of the srcjet pt
     l1t::PFJet edmTaggedJet(srcjet.pt(),
                             srcjet.eta(),
                             srcjet.phi(),
@@ -131,6 +133,10 @@ void L1TSC4NGJetProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                             gtHWTaggedJet.v3.phi.V);
     edmTaggedJet.setEncodedJet(l1t::PFJet::HWEncoding::CT, ctHWTaggedJet.pack());
     edmTaggedJet.setEncodedJet(l1t::PFJet::HWEncoding::GT, gtHWTaggedJet.pack());
+
+    // Convert corrected hwPt to float (GeV)
+    float correctedPt = ctHWTaggedJet.floatPt();
+    edmTaggedJet.calibratePt(correctedPt);
 
     std::vector<edm::Ptr<l1t::PFCandidate>> constituents;
     std::for_each(srcjet.constituents().begin(), srcjet.constituents().end(), [&](auto constituent) {
@@ -152,12 +158,12 @@ void L1TSC4NGJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descr
   desc.add<bool>("returnRawPt", false);
   desc.add<std::string>("correctorFile", "");
   desc.add<std::string>("correctorDir", "");
-  desc.add<std::string>("l1tSC4NGJetModelPath", std::string("L1TSC4NGJetModel_v0"));
+  desc.add<std::string>("l1tSC4NGJetModelPath", std::string("L1TSC4NGJetModel_pT"));
   desc.add<int>("maxJets", 16);
   desc.add<int>("nParticles", 16);
-  desc.add<double>("minPt", 10);
+  desc.add<double>("minPt", 15);
   desc.add<double>("maxEta", 2.4);
-  desc.add<std::vector<std::string>>("classes", {"b", "c", "uds", "g", "tau_p", "tau_n", "mu", "e"});
+  desc.add<std::vector<std::string>>("classes", {"b", "c", "uds", "g", "tau_p", "tau_n", "mu", "e", "regression"});
   descriptions.add("l1tSC4NGJetProducer", desc);
 }
 

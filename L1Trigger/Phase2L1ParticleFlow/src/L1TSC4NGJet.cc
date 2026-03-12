@@ -3,15 +3,30 @@
 #include "L1Trigger/Phase2L1ParticleFlow/interface/common/log.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include <cmath>
+#include <codecvt>
+#include <iostream>
+
+typedef ap_fixed<32,16,AP_RND,AP_SAT,0> input_t;
+typedef ap_fixed<32,16,AP_RND,AP_SAT,0> input10_t;
+typedef ap_ufixed<17,1,AP_RND,AP_SAT,0> input28_t;
+
+// Then define the struct
+struct ModelInputs {
+    input_t* basic_input;
+    input28_t* constituent_fraction;
+    input10_t* jet_features;
+};
 
 L1TSC4NGJetID::L1TSC4NGJetID(const std::shared_ptr<hls4mlEmulator::Model> model, int iNParticles, bool debug)
-    : modelRef_(model) {
+    : modelRef_(model)
+ {
   NNvectorVar_.clear();
   fNParticles_ = iNParticles;
   isDebugEnabled_ = debug;
 
   fPt_ = std::make_unique<inputtype[]>(fNParticles_);
   fPt_rel_ = std::make_unique<inputtype[]>(fNParticles_);
+  fEta_ = std::make_unique<inputtype[]>(fNParticles_);
   fDEta_ = std::make_unique<inputtype[]>(fNParticles_);
   fDPhi_ = std::make_unique<inputtype[]>(fNParticles_);
   fPt_log_ = std::make_unique<inputtype[]>(fNParticles_);
@@ -25,6 +40,9 @@ L1TSC4NGJetID::L1TSC4NGJetID(const std::shared_ptr<hls4mlEmulator::Model> model,
 
   fId_ = std::make_unique<inputtype[]>(fNParticles_);
   fCharge_ = std::make_unique<inputtype[]>(fNParticles_);
+
+   fJetPt_ = 0;
+   fJetEta_ = 0;
 }
 
 void L1TSC4NGJetID::setNNVectorVar() {
@@ -40,6 +58,7 @@ void L1TSC4NGJetID::setNNVectorVar() {
     NNvectorVar_.push_back(filled ? fPt_.get()[i0] : null_value);      // pt
     NNvectorVar_.push_back(filled ? fPt_rel_.get()[i0] : null_value);  // pT as a fraction of jet pT
     NNvectorVar_.push_back(filled ? fPt_log_.get()[i0] : null_value);  // pt log
+    NNvectorVar_.push_back(filled ? fEta_.get()[i0] : null_value);      // eta
     NNvectorVar_.push_back(filled ? fDEta_.get()[i0] : null_value);    // dEta from jet axis
     NNvectorVar_.push_back(filled ? fDPhi_.get()[i0] : null_value);    // dPhi from jet axis
     NNvectorVar_.push_back(filled ? fMass_.get()[i0] : null_value);    // Mass
@@ -60,86 +79,136 @@ void L1TSC4NGJetID::setNNVectorVar() {
 
     if (isDebugEnabled_) {
       LogDebug("L1TSC4NGJetID") << "Particle: " << i0 << "\n"
-                                << "pT: " << NNvectorVar_[i0 * 20]
+                                << "pT: " << NNvectorVar_[i0 * 21]
                                 << " | "
                                    "pT rel: "
-                                << NNvectorVar_[i0 * 20 + 1]
+                                << NNvectorVar_[i0 * 21 + 1]
                                 << " | "
                                    "pT log: "
-                                << NNvectorVar_[i0 * 20 + 2]
+                                << NNvectorVar_[i0 * 21 + 2]
+                                << " | "
+                                   "eta: "
+                                << NNvectorVar_[i0 * 21 + 3]
                                 << " | "
                                    "dEta: "
-                                << NNvectorVar_[i0 * 20 + 3]
+                                << NNvectorVar_[i0 * 21 + 4]
                                 << " | "
                                    "dPhi: "
-                                << NNvectorVar_[i0 * 20 + 4]
+                                << NNvectorVar_[i0 * 21 + 5]
                                 << " | "
                                    "mass: "
-                                << NNvectorVar_[i0 * 20 + 5]
+                                << NNvectorVar_[i0 * 21 + 6]
                                 << " | "
                                    "photon ID: "
-                                << NNvectorVar_[i0 * 20 + 6]
+                                << NNvectorVar_[i0 * 21 + 7]
                                 << " | "
                                    "electron + ID: "
-                                << NNvectorVar_[i0 * 20 + 7]
+                                << NNvectorVar_[i0 * 21 + 8]
                                 << " | "
                                    "electron - ID: "
-                                << NNvectorVar_[i0 * 20 + 8]
+                                << NNvectorVar_[i0 * 21 + 9]
                                 << " | "
                                    "muon + ID: "
-                                << NNvectorVar_[i0 * 20 + 9]
+                                << NNvectorVar_[i0 * 21 + 10]
                                 << " | "
                                    "muon - ID: "
-                                << NNvectorVar_[i0 * 20 + 10]
+                                << NNvectorVar_[i0 * 21 + 11]
                                 << " | "
                                    "neutral hadron ID: "
-                                << NNvectorVar_[i0 * 20 + 11]
+                                << NNvectorVar_[i0 * 21 + 12]
                                 << " | "
                                    "hadron + ID: "
-                                << NNvectorVar_[i0 * 20 + 12]
+                                << NNvectorVar_[i0 * 21 + 13]
                                 << " | "
                                    "hadron - ID: "
-                                << NNvectorVar_[i0 * 20 + 13]
+                                << NNvectorVar_[i0 * 21 + 14]
                                 << " | "
                                    "z0: "
-                                << NNvectorVar_[i0 * 20 + 14]
+                                << NNvectorVar_[i0 * 21 + 15]
                                 << " | "
                                    "sqrt Dxy: "
-                                << NNvectorVar_[i0 * 20 + 15]
+                                << NNvectorVar_[i0 * 21 + 16]
                                 << " | "
                                    "is filled: "
-                                << NNvectorVar_[i0 * 20 + 16]
+                                << NNvectorVar_[i0 * 21 + 17]
                                 << " | "
                                    "puppi weight: "
-                                << NNvectorVar_[i0 * 20 + 17]
+                                << NNvectorVar_[i0 * 21 + 18]
                                 << " | "
                                    "ElectroMagnetic ID: "
-                                << NNvectorVar_[i0 * 20 + 18]
+                                << NNvectorVar_[i0 * 21 + 19]
                                 << " | "
                                    "Track Quality: "
-                                << NNvectorVar_[i0 * 20 + 19] << " | "
+                                << NNvectorVar_[i0 * 21 + 20] << " | "
                                 << "===========" << std::endl;
     }
   }
+  // After the particle loop
+  NNvectorVar_.push_back(fJetPt_);
+  NNvectorVar_.push_back(fJetEta_);
 }
 
 L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
-  const int NInputs = 320;
+  const int NInputs = 336;
+  const int NParticles = fNParticles_;
   classtype classresult;
   regressiontype regressionresult;
 
   inputtype fillzero = 0.0;
 
-  inputtype modelInput[NInputs] = {};  // Do something
-  std::fill(modelInput, modelInput + NInputs, fillzero);
-
-  for (unsigned int i = 0; i < NNvectorVar_.size(); i++) {
-    modelInput[i] = NNvectorVar_[i];
+  // Base Input
+  input_t baseInput[NInputs] = {};  // Do something
+  std::fill(baseInput, baseInput + NInputs, fillzero);
+  for (unsigned int i = 0; i < NInputs; i++) {
+      baseInput[i] = NNvectorVar_[i];
+      // baseInput[i] = 0;
   }
+
+
+  // Mask for the constituents
+//   const int NFeaturesHidden = 10;
+//   const int NMaskVals = NParticles * NFeaturesHidden;
+//   input9_t modelMask[NMaskVals] = {};  // Do something
+//   int mask_counter = 0;
+//   for (int i = 0; i < NParticles; i++) {
+//     input9_t mask_val = fIs_filled_.get()[i];  // 1 = real, 0 = padded
+//     for (int f = 0; f < NFeaturesHidden; f++) {
+//         modelMask[mask_counter] = mask_val;
+//         mask_counter++;
+//     }
+//   }
+
+   // Mask for pt
+   // input19_t modelPtMask[NParticles] = {};  // Do something
+   // for (int i = 0; i < NParticles; i++) {
+   //    modelPtMask[i] = fIs_filled_.get()[i];
+   // }
+
+  // Just the constituents pt fractions
+   input_t jetPt = NNvectorVar_[NInputs];
+   input28_t pTFractions[NParticles] = {};  // Do something
+   for (int i = 0; i < NParticles; i++) {
+      pTFractions[i] = fPt_.get()[i] / jetPt;  // pt as a fraction of jet pt
+      // pTFractions[i] = 0;
+   }
+
+  // Jet Features
+   input10_t modelJetFeatures[2] = {};
+   modelJetFeatures[0] = NNvectorVar_[NInputs]; // hw jet pt
+   modelJetFeatures[1] = NNvectorVar_[NInputs + 1]; // hw jet eta
+   // modelJetFeatures[0] = 0;
+   // modelJetFeatures[1] = 0;
+
+   // Fill the model input struct
+   ModelInputs inputs;
+
+   inputs.basic_input          = baseInput;
+   inputs.constituent_fraction = pTFractions;
+   inputs.jet_features         = modelJetFeatures;
 
   pairtype modelResult;
 
-  modelRef_->prepare_input(modelInput);
+  modelRef_->prepare_input(inputs);
   modelRef_->predict();
   modelRef_->read_result(&modelResult);
 
@@ -169,6 +238,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet &iJet
   for (int i0 = 0; i0 < fNParticles_; i0++) {
     fPt_rel_.get()[i0] = 0;
     fPt_.get()[i0] = 0;
+    fEta_.get()[i0] = 0;
     fDEta_.get()[i0] = 0;
     fDPhi_.get()[i0] = 0;
     fPt_log_.get()[i0] = 0;
@@ -191,19 +261,24 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet &iJet
 
   l1ct::Jet ctJet = l1ct::Jet::unpack(iJet.getHWJetCT());
   inputtype jet_pt_ = inputtype(ctJet.hwPt);
-  inputtype jet_eta_ = inputtype(ctJet.hwEta);
   inputtype jet_phi_ = inputtype(ctJet.hwPhi);
+  inputtype jet_eta_ = inputtype(ctJet.hwEta);
 
+  // Fill jet level features
+  fJetPt_ = jet_pt_;
+  fJetEta_ = jet_eta_;
   for (unsigned int i0 = 0; i0 < iParts.size(); i0++) {
     if (i0 >= (unsigned int)fNParticles_)
       break;
     l1ct::PuppiObj puppicand = l1ct::PuppiObj::unpack(iParts[i0]->encodedPuppi64());
     fPt_.get()[i0] = inputtype(puppicand.hwPt);
 
-    constexpr int INV_LUT_SIZE = 256;
-    inputtype inv_jet_pt = l1ct::invert_with_shift<inputtype, inputtype, INV_LUT_SIZE>(jet_pt_);
+    constexpr int INV_LUT_SIZE = 1024;
+    inputtype inv_jet_pt = l1ct::invert_with_shift<l1ct::pt_t, inputtype, INV_LUT_SIZE>(jet_pt_);
 
     fPt_rel_.get()[i0] = inputtype(puppicand.hwPt) * inv_jet_pt;
+
+    fEta_.get()[i0] = inputtype(puppicand.hwEta);
 
     L1SCJetEmu::detaphi_t dphi(puppicand.hwPhi - jet_phi_);
     // phi wrap

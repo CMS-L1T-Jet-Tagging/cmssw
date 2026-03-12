@@ -1,6 +1,7 @@
 #ifndef L1TRIGGER_PHASE2L1PARTICLEFLOWS_L1TSC4NGJetID_H
 #define L1TRIGGER_PHASE2L1PARTICLEFLOWS_L1TSC4NGJetID_H
 
+#include <memory>
 #include <string>
 #include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
 #include "DataFormats/L1TParticleFlow/interface/PFCandidate.h"
@@ -44,7 +45,7 @@ class L1TSC4NGJetID {
 public:
   L1TSC4NGJetID(const std::shared_ptr<hls4mlEmulator::Model> model, int iNParticles, bool debug);
 
-  typedef ap_fixed<24, 12, AP_RND, AP_SAT, 0> inputtype;
+  typedef ap_fixed<32, 16, AP_RND, AP_SAT, 0> inputtype;
   typedef std::array<ap_ufixed<24, 12, AP_RND, AP_SAT, 0>, 8> classtype;
   typedef std::array<ap_fixed<16, 6>, 1> regressiontype;
   typedef std::pair<regressiontype, classtype> pairtype;
@@ -58,11 +59,13 @@ public:
   outputpairtype EvaluateNNFixed();
   outputpairtype computeFixed(const l1t::PFJet &iJet);
 
+
 private:
   std::vector<inputtype> NNvectorVar_;
   int fNParticles_;
   unique_ptr<inputtype[]> fPt_;
   unique_ptr<inputtype[]> fPt_rel_;
+  unique_ptr<inputtype[]> fEta_;
   unique_ptr<inputtype[]> fDEta_;
   unique_ptr<inputtype[]> fDPhi_;
   unique_ptr<inputtype[]> fPt_log_;
@@ -76,6 +79,9 @@ private:
 
   unique_ptr<inputtype[]> fCharge_;
   unique_ptr<inputtype[]> fId_;
+
+  inputtype fJetPt_;
+  inputtype fJetEta_;
   std::shared_ptr<hls4mlEmulator::Model> modelRef_;
 
   bool isDebugEnabled_;

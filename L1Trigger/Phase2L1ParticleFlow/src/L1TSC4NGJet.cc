@@ -7,14 +7,16 @@
 #include <iostream>
 
 typedef ap_fixed<32,16,AP_RND,AP_SAT,0> input_t;
-typedef ap_fixed<32,16,AP_RND,AP_SAT,0> input10_t;
-typedef ap_ufixed<17,1,AP_RND,AP_SAT,0> input28_t;
+typedef ap_fixed<32,16,AP_RND,AP_SAT,0> input12_t;
+typedef ap_ufixed<17,1,AP_RND,AP_SAT,0> input29_t;
+typedef ap_uint<1> input17_t;
 
 // Then define the struct
 struct ModelInputs {
     input_t* basic_input;
-    input28_t* constituent_fraction;
-    input10_t* jet_features;
+    input29_t* constituent_fraction;
+    input12_t* jet_features;
+    input17_t* pt_mask;
 };
 
 L1TSC4NGJetID::L1TSC4NGJetID(const std::shared_ptr<hls4mlEmulator::Model> model, int iNParticles, bool debug)
@@ -161,7 +163,6 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
   std::fill(baseInput, baseInput + NInputs, fillzero);
   for (unsigned int i = 0; i < NInputs; i++) {
       baseInput[i] = NNvectorVar_[i];
-      // baseInput[i] = 0;
   }
 
 
@@ -179,25 +180,24 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
 //   }
 
    // Mask for pt
-   // input19_t modelPtMask[NParticles] = {};  // Do something
-   // for (int i = 0; i < NParticles; i++) {
-   //    modelPtMask[i] = fIs_filled_.get()[i];
-   // }
+   input17_t modelPtMask[NParticles] = {};  // Do something
+   for (int i = 0; i < NParticles; i++) {
+      modelPtMask[i] = fIs_filled_.get()[i];
+   }
 
   // Just the constituents pt fractions
    input_t jetPt = NNvectorVar_[NInputs];
-   input28_t pTFractions[NParticles] = {};  // Do something
+   input29_t pTFractions[NParticles] = {};  // Do something
    for (int i = 0; i < NParticles; i++) {
       pTFractions[i] = fPt_.get()[i] / jetPt;  // pt as a fraction of jet pt
-      // pTFractions[i] = 0;
    }
 
   // Jet Features
-   input10_t modelJetFeatures[2] = {};
-   modelJetFeatures[0] = NNvectorVar_[NInputs]; // hw jet pt
-   modelJetFeatures[1] = NNvectorVar_[NInputs + 1]; // hw jet eta
-   // modelJetFeatures[0] = 0;
-   // modelJetFeatures[1] = 0;
+   input12_t modelJetFeatures[2] = {};
+   modelJetFeatures[0] = l1ct::log_with_shift<l1ct::pt_t, inputtype, 256>(NNvectorVar_[NInputs]); // log pt
+   modelJetFeatures[1] = (NNvectorVar_[NInputs + 1] < 0)
+                       ? input12_t(-NNvectorVar_[NInputs + 1])
+                       : input12_t(NNvectorVar_[NInputs + 1]); // abs jet eta
 
    // Fill the model input struct
    ModelInputs inputs;
@@ -205,6 +205,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
    inputs.basic_input          = baseInput;
    inputs.constituent_fraction = pTFractions;
    inputs.jet_features         = modelJetFeatures;
+   inputs.pt_mask              = modelPtMask;
 
   pairtype modelResult;
 
@@ -216,7 +217,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
   if (isDebugEnabled_) {
     LogDebug("L1TSC4NGJetID") << "\n ===== Jet ID Output Score =====" << std::endl;
   }
-  for (unsigned int i = 0; i < 8; i++) {
+  for (unsigned int i = 0; i < 9; i++) {
     // Cast model output to jet tag score datatype
     modelResult_forOutput.second[i] = l1ct::jet_tag_score_t(modelResult.second[i]);
     if (isDebugEnabled_) {

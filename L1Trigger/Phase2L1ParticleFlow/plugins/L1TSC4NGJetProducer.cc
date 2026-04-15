@@ -93,8 +93,9 @@ void L1TSC4NGJetProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     for (unsigned i = 0; i < classes_.size() - 1; i++) {
       ctHWTaggedJet.hwTagScores[i] = JetModel_output.second[i];
       JetScore_float.push_back((float)JetModel_output.second[i]);
+      std::cout << "Score" << JetModel_output.second[i] << " for class " << classes_[i] << std::endl;
     }
-    ctHWTaggedJet.hwTagScores[8] = JetModel_output.first[0];
+    ctHWTaggedJet.hwTagScores[9] = JetModel_output.first[0];
     JetScore_float.push_back((float)JetModel_output.first[0]);
     L1TSC4NGJetID::output_regression_type PtCorrection_ = JetModel_output.first[0];
     L1TSC4NGJetID::output_regression_type tempPt = ctHWTaggedJet.hwPt;
@@ -158,12 +159,12 @@ void L1TSC4NGJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descr
   desc.add<bool>("returnRawPt", false);
   desc.add<std::string>("correctorFile", "");
   desc.add<std::string>("correctorDir", "");
-  desc.add<std::string>("l1tSC4NGJetModelPath", std::string("L1TSC4NGJetModel_pT"));
+  desc.add<std::string>("l1tSC4NGJetModelPath", std::string("L1TSC4NGJetModel_PtPU1"));
   desc.add<int>("maxJets", 16);
   desc.add<int>("nParticles", 16);
   desc.add<double>("minPt", 15);
   desc.add<double>("maxEta", 2.4);
-  desc.add<std::vector<std::string>>("classes", {"b", "c", "uds", "g", "tau_p", "tau_n", "mu", "e", "regression"});
+  desc.add<std::vector<std::string>>("classes", {"b", "c", "uds", "g", "tau_p", "tau_n", "mu", "e", "pileup", "regression"});
   descriptions.add("l1tSC4NGJetProducer", desc);
 }
 

@@ -93,7 +93,6 @@ void L1TSC4NGJetProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     for (unsigned i = 0; i < classes_.size() - 1; i++) {
       ctHWTaggedJet.hwTagScores[i] = JetModel_output.second[i];
       JetScore_float.push_back((float)JetModel_output.second[i]);
-      std::cout << "Score" << JetModel_output.second[i] << " for class " << classes_[i] << std::endl;
     }
     ctHWTaggedJet.hwTagScores[9] = JetModel_output.first[0];
     JetScore_float.push_back((float)JetModel_output.first[0]);

@@ -159,37 +159,23 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
   inputtype fillzero = 0.0;
 
   // Base Input
-  input_t baseInput[NInputs] = {};  // Do something
+  input_t baseInput[NInputs] = {};
   std::fill(baseInput, baseInput + NInputs, fillzero);
   for (unsigned int i = 0; i < NInputs; i++) {
       baseInput[i] = NNvectorVar_[i];
   }
 
-
-  // Mask for the constituents
-//   const int NFeaturesHidden = 10;
-//   const int NMaskVals = NParticles * NFeaturesHidden;
-//   input9_t modelMask[NMaskVals] = {};  // Do something
-//   int mask_counter = 0;
-//   for (int i = 0; i < NParticles; i++) {
-//     input9_t mask_val = fIs_filled_.get()[i];  // 1 = real, 0 = padded
-//     for (int f = 0; f < NFeaturesHidden; f++) {
-//         modelMask[mask_counter] = mask_val;
-//         mask_counter++;
-//     }
-//   }
-
    // Mask for pt
-   input17_t modelPtMask[NParticles] = {};  // Do something
+   input17_t modelPtMask[NParticles] = {};
    for (int i = 0; i < NParticles; i++) {
       modelPtMask[i] = fIs_filled_.get()[i];
    }
 
   // Just the constituents pt fractions
    input_t jetPt = NNvectorVar_[NInputs];
-   input29_t pTFractions[NParticles] = {};  // Do something
+   input29_t pTFractions[NParticles] = {};
    for (int i = 0; i < NParticles; i++) {
-      pTFractions[i] = fPt_.get()[i] / jetPt;  // pt as a fraction of jet pt
+      pTFractions[i] = fPt_rel_.get()[i];  // pt rel feature as a fraction of jet pt
    }
 
   // Jet Features

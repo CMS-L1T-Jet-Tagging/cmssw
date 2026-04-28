@@ -266,7 +266,9 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet &iJet
     fPt_rel_.get()[i0] = inputtype(puppicand.hwPt) * inv_jet_pt;
 
     inputtype const_eta = inputtype(puppicand.hwEta);
-    fEta_.get()[i0] = (const_eta < 0) ? -const_eta : const_eta;
+    fEta_.get()[i0] = (const_eta < 0)
+      ? inputtype(-const_eta)
+      : inputtype(const_eta);
 
     L1SCJetEmu::detaphi_t dphi(puppicand.hwPhi - jet_phi_);
     // phi wrap

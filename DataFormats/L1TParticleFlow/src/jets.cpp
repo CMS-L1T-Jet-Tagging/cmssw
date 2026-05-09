@@ -9,6 +9,7 @@ const std::unordered_map<std::string, l1ct::JetTagClass::JetTagClassValue> l1ct:
     {"tau_n", l1ct::JetTagClass::JetTagClassValue::tau_n},
     {"mu", l1ct::JetTagClass::JetTagClassValue::mu},
     {"e", l1ct::JetTagClass::JetTagClassValue::e},
+    {"pileup", l1ct::JetTagClass::JetTagClassValue::pileup},
     {"nprong", l1ct::JetTagClass::JetTagClassValue::nprong}};
 
 const l1ct::JetTagClass l1ct::JetTagClassHandler::tagClassesDefault_[NTagFields] = {l1ct::JetTagClass("b"),
@@ -19,4 +20,5 @@ const l1ct::JetTagClass l1ct::JetTagClassHandler::tagClassesDefault_[NTagFields]
                                                                                     l1ct::JetTagClass("tau_n"),
                                                                                     l1ct::JetTagClass("mu"),
                                                                                     l1ct::JetTagClass("e"),
+                                                                                    l1ct::JetTagClass("pileup"),
                                                                                     l1ct::JetTagClass("nprong")};

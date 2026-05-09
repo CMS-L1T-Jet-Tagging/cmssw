@@ -20,7 +20,7 @@ using namespace L1TSC4NGJet;
 
 L1TSC4NGJetID::L1TSC4NGJetID(const std::shared_ptr<hls4mlEmulator::Model> model, int iNParticles, bool debug)
     : modelRef_(model) {
-  NNvectorVar_.clear();
+  candidate_vector_.clear();
   fNParticles_ = iNParticles;
   isDebugEnabled_ = debug;
 
@@ -36,13 +36,20 @@ L1TSC4NGJetID::L1TSC4NGJetID(const std::shared_ptr<hls4mlEmulator::Model> model,
   fPuppi_weight_ = std::make_unique<inputtype[]>(fNParticles_);
   fEmID_ = std::make_unique<inputtype[]>(fNParticles_);
   fQuality_ = std::make_unique<inputtype[]>(fNParticles_);
+  fEta_ = std::make_unique<inputtype[]>(fNParticles_);
 
   fId_ = std::make_unique<inputtype[]>(fNParticles_);
   fCharge_ = std::make_unique<inputtype[]>(fNParticles_);
+
+  fJetPt_ = 0;
+  fJetEta_ = 0;
+
+
 }
 
-void L1TSC4NGJetID::setNNVectorVar() {
-  NNvectorVar_.clear();
+void L1TSC4NGJetID::setVectors() {
+  candidate_vector_.clear();
+  jet_vector_.clear();
   if (isDebugEnabled_) {
     LogDebug("L1TSC4NGJetID") << "\n ===== Input Vector =====" << std::endl;
   }
@@ -51,109 +58,120 @@ void L1TSC4NGJetID::setNNVectorVar() {
     bool filled = fIs_filled_.get()[i0] == 1;
     inputtype null_value = 0;
 
-    NNvectorVar_.push_back(filled ? fPt_.get()[i0] : null_value);      // pt
-    NNvectorVar_.push_back(filled ? fPt_rel_.get()[i0] : null_value);  // pT as a fraction of jet pT
-    NNvectorVar_.push_back(filled ? fPt_log_.get()[i0] : null_value);  // pt log
-    NNvectorVar_.push_back(filled ? fDEta_.get()[i0] : null_value);    // dEta from jet axis
-    NNvectorVar_.push_back(filled ? fDPhi_.get()[i0] : null_value);    // dPhi from jet axis
-    NNvectorVar_.push_back(filled ? fMass_.get()[i0] : null_value);    // Mass
-    NNvectorVar_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::PHOTON) : null_value);    // Photon
-    NNvectorVar_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::ELEPLUS) : null_value);   // Positron
-    NNvectorVar_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::ELEMINUS) : null_value);  // Electron
-    NNvectorVar_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::MUPLUS) : null_value);    // Anti-muon
-    NNvectorVar_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::MUMINUS) : null_value);   // Muon
-    NNvectorVar_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::HADZERO) : null_value);
-    NNvectorVar_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::HADPLUS) : null_value);   // Anti-Pion
-    NNvectorVar_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::HADMINUS) : null_value);  // Pion
-    NNvectorVar_.push_back(filled ? fZ0_.get()[i0] : null_value);                                           // z0
-    NNvectorVar_.push_back(filled ? fDxy_.get()[i0] : null_value);                                          // dxy
-    NNvectorVar_.push_back(filled ? fIs_filled_.get()[i0] : null_value);                                    // isfilled
-    NNvectorVar_.push_back(filled ? fPuppi_weight_.get()[i0] : null_value);  // puppi weight
-    NNvectorVar_.push_back(filled ? fEmID_.get()[i0] : null_value);          // emID
-    NNvectorVar_.push_back(filled ? fQuality_.get()[i0] : null_value);       // quality
+    candidate_vector_.push_back(filled ? fPt_.get()[i0] : null_value);      // pt
+    candidate_vector_.push_back(filled ? fPt_rel_.get()[i0] : null_value);  // pT as a fraction of jet pT
+    candidate_vector_.push_back(filled ? fPt_log_.get()[i0] : null_value);  // pt log
+    candidate_vector_.push_back(filled ? fDEta_.get()[i0] : null_value);    // dEta from jet axis
+    candidate_vector_.push_back(filled ? fDPhi_.get()[i0] : null_value);    // dPhi from jet axis
+    candidate_vector_.push_back(filled ? fMass_.get()[i0] : null_value);    // Mass
+    candidate_vector_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::PHOTON) : null_value);    // Photon
+    candidate_vector_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::ELEPLUS) : null_value);   // Positron
+    candidate_vector_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::ELEMINUS) : null_value);  // Electron
+    candidate_vector_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::MUPLUS) : null_value);    // Anti-muon
+    candidate_vector_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::MUMINUS) : null_value);   // Muon
+    candidate_vector_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::HADZERO) : null_value);
+    candidate_vector_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::HADPLUS) : null_value);   // Anti-Pion
+    candidate_vector_.push_back(filled ? inputtype(fId_.get()[i0] == l1ct::ParticleID::HADMINUS) : null_value);  // Pion
+    candidate_vector_.push_back(filled ? fZ0_.get()[i0] : null_value);                                           // z0
+    candidate_vector_.push_back(filled ? fDxy_.get()[i0] : null_value);                                          // dxy
+    candidate_vector_.push_back(filled ? fIs_filled_.get()[i0] : null_value);                                    // isfilled
+    candidate_vector_.push_back(filled ? fPuppi_weight_.get()[i0] : null_value);  // puppi weight
+    candidate_vector_.push_back(filled ? fEmID_.get()[i0] : null_value);          // emID
+    candidate_vector_.push_back(filled ? fQuality_.get()[i0] : null_value);       // quality
+    candidate_vector_.push_back(filled ? fEta_.get()[i0] : null_value); // eta
 
     if (isDebugEnabled_) {
       LogDebug("L1TSC4NGJetID") << "Particle: " << i0 << "\n"
-                                << "pT: " << NNvectorVar_[i0 * 20]
+                                << "pT: " << candidate_vector_[i0 * N_candidate_features]
                                 << " | "
                                    "pT rel: "
-                                << NNvectorVar_[i0 * 20 + 1]
+                                << candidate_vector_[i0 * N_candidate_features + 1]
                                 << " | "
                                    "pT log: "
-                                << NNvectorVar_[i0 * 20 + 2]
+                                << candidate_vector_[i0 * N_candidate_features + 2]
                                 << " | "
                                    "dEta: "
-                                << NNvectorVar_[i0 * 20 + 3]
+                                << candidate_vector_[i0 * N_candidate_features + 3]
                                 << " | "
                                    "dPhi: "
-                                << NNvectorVar_[i0 * 20 + 4]
+                                << candidate_vector_[i0 * N_candidate_features + 4]
                                 << " | "
                                    "mass: "
-                                << NNvectorVar_[i0 * 20 + 5]
+                                << candidate_vector_[i0 * N_candidate_features + 5]
                                 << " | "
                                    "photon ID: "
-                                << NNvectorVar_[i0 * 20 + 6]
+                                << candidate_vector_[i0 * N_candidate_features + 6]
                                 << " | "
                                    "electron + ID: "
-                                << NNvectorVar_[i0 * 20 + 7]
+                                << candidate_vector_[i0 * N_candidate_features + 7]
                                 << " | "
                                    "electron - ID: "
-                                << NNvectorVar_[i0 * 20 + 8]
+                                << candidate_vector_[i0 * N_candidate_features + 8]
                                 << " | "
                                    "muon + ID: "
-                                << NNvectorVar_[i0 * 20 + 9]
+                                << candidate_vector_[i0 * N_candidate_features + 9]
                                 << " | "
                                    "muon - ID: "
-                                << NNvectorVar_[i0 * 20 + 10]
+                                << candidate_vector_[i0 * N_candidate_features + 10]
                                 << " | "
                                    "neutral hadron ID: "
-                                << NNvectorVar_[i0 * 20 + 11]
+                                << candidate_vector_[i0 * N_candidate_features + 11]
                                 << " | "
                                    "hadron + ID: "
-                                << NNvectorVar_[i0 * 20 + 12]
+                                << candidate_vector_[i0 * N_candidate_features + 12]
                                 << " | "
                                    "hadron - ID: "
-                                << NNvectorVar_[i0 * 20 + 13]
+                                << candidate_vector_[i0 * N_candidate_features + 13]
                                 << " | "
                                    "z0: "
-                                << NNvectorVar_[i0 * 20 + 14]
+                                << candidate_vector_[i0 * N_candidate_features + 14]
                                 << " | "
                                    "sqrt Dxy: "
-                                << NNvectorVar_[i0 * 20 + 15]
+                                << candidate_vector_[i0 * N_candidate_features + 15]
                                 << " | "
                                    "is filled: "
-                                << NNvectorVar_[i0 * 20 + 16]
+                                << candidate_vector_[i0 * N_candidate_features + 16]
                                 << " | "
                                    "puppi weight: "
-                                << NNvectorVar_[i0 * 20 + 17]
+                                << candidate_vector_[i0 * N_candidate_features + 17]
                                 << " | "
                                    "ElectroMagnetic ID: "
-                                << NNvectorVar_[i0 * 20 + 18]
+                                << candidate_vector_[i0 * N_candidate_features + 18]
                                 << " | "
                                    "Track Quality: "
-                                << NNvectorVar_[i0 * 20 + 19] << " | "
+                                << candidate_vector_[i0 * N_candidate_features + 19] 
+                                << " | "
+                                  "Eta: "
+                                << candidate_vector_[i0 * N_candidate_features + 20] 
+                                << " | "
                                 << "===========" << std::endl;
     }
   }
+
+  // After the particle loop
+  jet_vector_.push_back(fJetPt_);
+  jet_vector_.push_back(fJetEta_);
 }
 
 L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
   inputtype fillzero = 0.0;
 
-  // Define Candidate inputs and fill fully with 0s. Allows for case when N_candidate_inputs > NNvectorVar_.size(). 
+  // Define Candidate inputs and fill fully with 0s. Allows for case when N_candidate_inputs > candidate_vector_.size(). 
   inputtype modelCandidateInput[N_candidate_inputs] = {};  
   std::fill(modelCandidateInput, modelCandidateInput + N_candidate_inputs, fillzero);
 
   // Fill the candidate inputs from the pre calculated NNvectorVar
-  for (unsigned int i = 0; i < NNvectorVar_.size(); i++) {
-    modelCandidateInput[i] = NNvectorVar_[i];
+  for (unsigned int i = 0; i < candidate_vector_.size(); i++) {
+    modelCandidateInput[i] = candidate_vector_[i];
   }
 
   // Define Jet inputs and fill fully with 0s.
   inputtype modelJetInput[N_jet_inputs] = {};  
   std::fill(modelJetInput, modelJetInput + N_jet_inputs, fillzero);
 
-  // Insert code here for loading of jet inputs to the modelJetInput
+  for (unsigned int i = 0; i < jet_vector_.size(); i++) {
+    modelJetInput[i] = jet_vector_[i];
+  }
 
   // Define input struct
   ModelInputs modelInputStruct;
@@ -220,6 +238,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet &iJet
     fPuppi_weight_.get()[i0] = 0;
     fEmID_.get()[i0] = 0;
     fQuality_.get()[i0] = 0;
+    fEta_.get()[i0] = 0;
 
     fId_.get()[i0] = 0;
     fCharge_.get()[i0] = 0;
@@ -234,6 +253,10 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet &iJet
   inputtype jet_pt_ = inputtype(ctJet.hwPt);
   inputtype jet_eta_ = inputtype(ctJet.hwEta);
   inputtype jet_phi_ = inputtype(ctJet.hwPhi);
+
+  // Fill jet level features
+  fJetPt_ = jet_pt_;
+  fJetEta_ = jet_eta_;
 
   for (unsigned int i0 = 0; i0 < iParts.size(); i0++) {
     if (i0 >= (unsigned int)fNParticles_)
@@ -273,9 +296,15 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet &iJet
     fEmID_.get()[i0] = puppicand.hwId.neutral() ? inputtype(puppicand.hwEmID()) : inputtype(0);
     fQuality_.get()[i0] = puppicand.hwId.charged() ? inputtype(puppicand.hwTkQuality()) : inputtype(0);
 
+
+    inputtype const_eta = inputtype(puppicand.hwEta);
+    fEta_.get()[i0] = (const_eta < 0)
+      ? inputtype(-const_eta)
+      : inputtype(const_eta);
+
     fCharge_.get()[i0] = inputtype(puppicand.hwId.charged());
     fId_.get()[i0] = inputtype(puppicand.hwId.bits);
   }
-  setNNVectorVar();
+  setVectors();
   return EvaluateNNFixed();
 }

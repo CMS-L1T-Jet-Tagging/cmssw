@@ -46,10 +46,10 @@ class L1TSC4NGJetID {
 public:
 
   static const int N_candidates = 16; // 16 candidates * 20 features
-  static const int N_candidate_features = 20; // 16 candidates * 20 features
+  static const int N_candidate_features = 21; // 16 candidates * 20 features
   static const int N_candidate_inputs = N_candidates * N_candidate_features;
-  static const int N_jet_inputs = 0; // 16 candidates * 20 features
-  static const int N_class_outputs = 8;
+  static const int N_jet_inputs = 2; // 16 candidates * 20 features
+  static const int N_class_outputs = 9;
   static const int N_regression_outputs = 1;
 
   L1TSC4NGJetID(const std::shared_ptr<hls4mlEmulator::Model> model, int iNParticles, bool debug);
@@ -58,12 +58,13 @@ public:
   // Intermediate output type for classification score to be loaded into jet word
   typedef std::array<l1ct::jet_tag_score_t, N_class_outputs> output_class_type;
   typedef std::pair<output_regression_type, output_class_type> outputpairtype;
-  void setNNVectorVar();
+  void setVectors();
   outputpairtype EvaluateNNFixed();
   outputpairtype computeFixed(const l1t::PFJet &iJet);
 
 private:
-  std::vector<L1TSC4NGJet::inputtype> NNvectorVar_;
+  std::vector<L1TSC4NGJet::inputtype> candidate_vector_;
+  std::vector<L1TSC4NGJet::inputtype> jet_vector_;
   int fNParticles_;
   unique_ptr<L1TSC4NGJet::inputtype[]> fPt_;
   unique_ptr<L1TSC4NGJet::inputtype[]> fPt_rel_;
@@ -77,9 +78,14 @@ private:
   unique_ptr<L1TSC4NGJet::inputtype[]> fPuppi_weight_;
   unique_ptr<L1TSC4NGJet::inputtype[]> fEmID_;
   unique_ptr<L1TSC4NGJet::inputtype[]> fQuality_;
+  unique_ptr<L1TSC4NGJet::inputtype[]> fEta_;
 
   unique_ptr<L1TSC4NGJet::inputtype[]> fCharge_;
   unique_ptr<L1TSC4NGJet::inputtype[]> fId_;
+
+  L1TSC4NGJet::inputtype fJetPt_;
+  L1TSC4NGJet::inputtype fJetEta_;
+
   std::shared_ptr<hls4mlEmulator::Model> modelRef_;
 
   bool isDebugEnabled_;

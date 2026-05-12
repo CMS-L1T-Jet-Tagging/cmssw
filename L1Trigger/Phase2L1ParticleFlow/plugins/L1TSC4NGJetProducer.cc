@@ -152,7 +152,7 @@ void L1TSC4NGJetProducer::fillDescriptions(edm::ConfigurationDescriptions& descr
   desc.add<bool>("returnRawPt", false);
   desc.add<std::string>("correctorFile", "");
   desc.add<std::string>("correctorDir", "");
-  desc.add<std::string>("l1tSC4NGJetModelPath", std::string("/eos/user/c/cebrown/Correlator/JetTag/EmulatorUpdate/CMSSW_15_1_0_pre4/src/L1TSC4NGJetModel/L1TSC4NGJetModel_v2_0_0"));
+  desc.add<std::string>("l1tSC4NGJetModelPath", std::string("/eos/user/c/cebrown/Correlator/JetTag/EmulatorUpdate/CMSSW_15_1_0_pre4/src/L1TSC4NGJetModel/L1TSC4NGJetModel_v1_0_1/L1TSC4NGJetModel_v1_0_1"));
   desc.add<int>("maxJets", 16);
   desc.add<int>("nParticles", 16);
   desc.add<double>("minPt", 10);

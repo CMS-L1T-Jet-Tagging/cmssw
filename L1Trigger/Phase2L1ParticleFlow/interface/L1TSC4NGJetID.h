@@ -57,7 +57,7 @@ public:
   typedef ap_ufixed<22, 12, AP_TRN, AP_SAT> output_regression_type;
   // Intermediate output type for classification score to be loaded into jet word
   typedef std::array<l1ct::jet_tag_score_t, N_class_outputs> output_class_type;
-  typedef std::pair<output_regression_type, output_class_type> outputpairtype;
+  typedef std::pair<std::array<output_regression_type,N_regression_outputs>, output_class_type> outputpairtype;
   void setVectors();
   outputpairtype EvaluateNNFixed();
   outputpairtype computeFixed(const l1t::PFJet &iJet);

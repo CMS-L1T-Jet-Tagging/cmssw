@@ -214,7 +214,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
 
   for (unsigned int i = 0; i < N_regression_outputs; i++) {
       // Cast model output to transient regression score for jet pt multiplication
-      modelResult_forOutput.first[i] = output_regression_type(modelOutputStruct.jet_regression_output[i]);
+      modelResult_forOutput.first[i] = modelOutputStruct.jet_regression_output[i];
       if (isDebugEnabled_) {
          LogDebug("L1TSC4NGJetID") << "\n ===== Jet pT Correction Output ===== \n"
                                     << modelOutputStruct.jet_regression_output[i] << " Cast to Jet pT type: " << modelResult_forOutput.first[i]
@@ -265,7 +265,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet &iJet
     fPt_.get()[i0] = inputtype(puppicand.hwPt);
 
     constexpr int INV_LUT_SIZE = 1024;
-    inputtype inv_jet_pt = inputtype(l1ct::invert_with_shift<l1ct::pt_t, l1ct::pt_t, INV_LUT_SIZE>(jet_pt_));
+    inputtype inv_jet_pt = inputtype(l1ct::invert_with_shift<l1ct::pt_t,l1ct::pt_t, INV_LUT_SIZE>(jet_pt_));
 
     fPt_rel_.get()[i0] = inputtype(puppicand.hwPt) * inv_jet_pt;
 

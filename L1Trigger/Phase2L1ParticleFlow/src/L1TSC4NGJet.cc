@@ -265,7 +265,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet& iJet
     fPt_.get()[i0] = inputtype(puppicand.hwPt);
 
     constexpr int INV_LUT_SIZE = 1024;
-    inputtype inv_jet_pt = l1ct::invert_with_shift<l1ct::pt_t, l1ct::pt_t, INV_LUT_SIZE>(jet_pt_);
+    inputtype inv_jet_pt = l1ct::invert_with_shift<l1ct::pt_t, inv_pt_t, INV_LUT_SIZE>(jet_pt_);
 
     fPt_rel_.get()[i0] = inputtype(puppicand.hwPt) * inv_jet_pt;
 
@@ -283,7 +283,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet& iJet
     fDPhi_.get()[i0] = dphiw;
 
     constexpr int LOG_LUT_SIZE = 256;
-    inputtype log_pt = l1ct::log_with_shift<l1ct::pt_t, l1ct::pt_t, LOG_LUT_SIZE>(puppicand.hwPt);
+    inputtype log_pt = l1ct::log_with_shift<l1ct::pt_t, log_pt_t, LOG_LUT_SIZE>(puppicand.hwPt);
     fPt_log_.get()[i0] = log_pt;
 
     inputtype massCand = L1TSC4NGJet::candidate_mass<inputtype>(puppicand);

@@ -87,7 +87,7 @@ private:
   std::unique_ptr<L1TSC4NGJet::inputtype[]> fCharge_;
   std::unique_ptr<L1TSC4NGJet::inputtype[]> fId_;
 
-  L1TSC4NGJet::inputtype fJetPt_;
+  L1TSC4NGJet::inputtype fJetPtLog_;
   L1TSC4NGJet::inputtype fJetEta_;
 
   std::shared_ptr<hls4mlEmulator::Model> modelRef_;

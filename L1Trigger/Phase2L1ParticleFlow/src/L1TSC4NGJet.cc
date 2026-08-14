@@ -169,7 +169,6 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
   std::fill(modelJetInput, modelJetInput + N_jet_inputs, fillzero);
   for (unsigned int i = 0; i < jet_vector_.size(); i++) {
     modelJetInput[i] = jet_vector_[i];
-    std::cout << "Jet input: " << i << " = " << modelJetInput[i] << std::endl;
   }
 
   // Define input struct
@@ -257,9 +256,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet& iJet
 
   // Fill jet level features
   fJetPtLog_ = l1ct::log_with_shift<l1ct::pt_t, log_pt_t, 256>(jet_pt_);
-  fJetEta_ = fJetEta_ = (jet_eta_ < 0)
-             ? inputtype(-jet_eta_)
-             : jet_eta_;
+  fJetEta_ = jet_eta_
 
   for (unsigned int i0 = 0; i0 < iParts.size(); i0++) {
     if (i0 >= (unsigned int)fNParticles_)
@@ -292,8 +289,7 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet& iJet
     inputtype massCand = L1TSC4NGJet::candidate_mass<inputtype>(puppicand);
     fMass_.get()[i0] = inputtype(massCand);
 
-    inputtype const_eta = inputtype(puppicand.hwEta);
-    fEta_.get()[i0] = (const_eta < 0) ? inputtype(-const_eta) : inputtype(const_eta);
+    fEta_.get()[i0] = inputtype(puppicand.hwEta);
 
     fZ0_.get()[i0] = puppicand.hwId.charged() ? inputtype(puppicand.hwZ0()) : inputtype(0);
     fDxy_.get()[i0] = puppicand.hwId.charged() ? inputtype(puppicand.hwDxy()) : inputtype(0);

@@ -40,8 +40,8 @@ L1TSC4NGJetID::L1TSC4NGJetID(const std::shared_ptr<hls4mlEmulator::Model> model,
   fId_ = std::make_unique<inputtype[]>(fNParticles_);
   fCharge_ = std::make_unique<inputtype[]>(fNParticles_);
 
-  fJetPtLog_ = 0;
   fJetEta_ = 0;
+  fJetPtLog_ = 0;
 }
 
 void L1TSC4NGJetID::setVectors() {
@@ -148,8 +148,8 @@ void L1TSC4NGJetID::setVectors() {
     }
   }
   // After the particle loop
-  jet_vector_.push_back(fJetPtLog_);
   jet_vector_.push_back(fJetEta_);
+  jet_vector_.push_back(fJetPtLog_);
 }
 
 L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::EvaluateNNFixed() {
@@ -255,8 +255,8 @@ L1TSC4NGJetID::outputpairtype L1TSC4NGJetID::computeFixed(const l1t::PFJet& iJet
   inputtype jet_phi_ = inputtype(ctJet.hwPhi);
 
   // Fill jet level features
-  fJetPtLog_ = l1ct::log_with_shift<l1ct::pt_t, log_pt_t, 256>(jet_pt_);
   fJetEta_ = jet_eta_;
+  fJetPtLog_ = l1ct::log_with_shift<l1ct::pt_t, log_pt_t, 256>(jet_pt_);
 
   for (unsigned int i0 = 0; i0 < iParts.size(); i0++) {
     if (i0 >= (unsigned int)fNParticles_)

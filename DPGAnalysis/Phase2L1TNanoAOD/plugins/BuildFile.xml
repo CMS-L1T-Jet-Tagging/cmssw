@@ -9,6 +9,13 @@
 <use name="DataFormats/L1TParticleFlow"/>
 <use name="DataFormats/NanoAOD"/>
 <use name="DataFormats/PatCandidates"/>
+<use name="DataFormats/HepMCCandidate"/>
+<use name="DataFormats/JetReco"/>
+<use name="DataFormats/JetMatching"/>
+<use name="DataFormats/VertexReco"/>
+<use name="L1Trigger/Phase2L1ParticleFlow"/>
+<use name="PhysicsTools/NanoAOD"/>
+<use name="rootphysics"/>
 <use name="DataFormats/ProtonReco"/>
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>

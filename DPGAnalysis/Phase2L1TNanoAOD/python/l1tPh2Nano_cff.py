@@ -12,8 +12,11 @@ def addPh2GTObjects(process):
 
 ### Main Ph2L1 objects
 from DPGAnalysis.Phase2L1TNanoAOD.l1tPh2Nanotables_cff import *
+### Jet tagger training objects (replica of JetNTuplizer content)
+from DPGAnalysis.Phase2L1TNanoAOD.l1tPh2JetTraining_cff import *
 def addPh2L1Objects(process):
     process.l1tPh2NanoTask.add(p2L1TablesTask)
+    addL1JetTrainingTables(process)
 
     # This modifier excludes the hpsTauTable, which is based on the l1tHPSPFTauProducerPuppi collection, no longer available in the L1 menu.
     # This allows to run the NANOAOD production from L1 and HLT steps, whitout requiring old inputs from the Spring24 datasets.
